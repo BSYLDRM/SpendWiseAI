@@ -42,11 +42,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.spendwiseai.data.db.dao.TransactionWithCategory
 import com.example.spendwiseai.domain.model.TransactionType
 import com.example.spendwiseai.presentation.transactions.TransactionsListViewModel
+import com.example.spendwiseai.R
 import com.example.spendwiseai.ui.theme.NeonGreen
 import com.example.spendwiseai.ui.theme.SoftCoralRed
 import java.text.SimpleDateFormat
@@ -94,7 +95,7 @@ fun TransactionsListScreen(
                         deleteCandidate = null
                         viewModel.deleteTransaction(id)
                     }
-                ) { Text("Delete") }
+                ) { Text(stringResource(id = R.string.delete)) }
             },
             dismissButton = {
                 TextButton(onClick = { deleteCandidate = null }) { Text("Cancel") }
@@ -116,7 +117,7 @@ fun TransactionsListScreen(
                         value = draft.amount,
                         onValueChange = { editDraft = draft.copy(amount = it); editError = null },
                         label = { Text("Amount") },
-                        keyboardOptions = androidx.compose.ui.text.input.KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                        singleLine = true
                     )
                     OutlinedTextField(
                         value = draft.currency,
@@ -171,6 +172,9 @@ fun TransactionsListScreen(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        item {
+            Text(text = title, style = MaterialTheme.typography.headlineSmall)
+        }
         items(stateValue.transactions.size) { index ->
             val tx = stateValue.transactions[index]
 
@@ -201,7 +205,7 @@ fun TransactionsListScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
+                            contentDescription = stringResource(id = R.string.delete),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }

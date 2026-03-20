@@ -6,14 +6,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.compose.ui.res.stringResource
 import com.example.spendwiseai.core.AppContainer
 import com.example.spendwiseai.presentation.SpendWiseViewModelFactory
 import com.example.spendwiseai.presentation.expense.AddExpenseViewModel
 import com.example.spendwiseai.presentation.transactions.TransactionsListViewModelFactory
+import com.example.spendwiseai.presentation.scan.ScanReceiptViewModelFactory
+import com.example.spendwiseai.presentation.insights.InsightsViewModelFactory
 import com.example.spendwiseai.ui.screens.AddExpenseScreen
 import com.example.spendwiseai.ui.screens.HomeScreen
 import com.example.spendwiseai.ui.screens.InsightsScreen
+import com.example.spendwiseai.ui.screens.ScanReceiptScreen
 import com.example.spendwiseai.ui.screens.TransactionsListScreen
+import com.example.spendwiseai.presentation.dashboard.DashboardViewModelFactory
 
 @Composable
 fun SpendWiseNavHost(
@@ -24,16 +29,21 @@ fun SpendWiseNavHost(
         SpendWiseViewModelFactory(appContainer.getAddExpenseUseCase())
     }
 
-    val transactionRepository = appContainer.getTransactionRepository()
+    val transactionRepository = appContainer.provideTransactionRepository()
 
     NavHost(
         navController = navController,
         startDestination = SpendWiseRoutes.Home.route
     ) {
         composable(SpendWiseRoutes.Home.route) {
+            val dashboardFactory = remember(appContainer) {
+                DashboardViewModelFactory(transactionRepository)
+            }
+            val dashboardVm: com.example.spendwiseai.presentation.dashboard.DashboardViewModel = viewModel(factory = dashboardFactory)
             HomeScreen(
                 onScanReceiptClicked = { navController.navigate(SpendWiseRoutes.Scan.route) },
-                onAddExpenseClicked = { navController.navigate(SpendWiseRoutes.Add.route) }
+                onAddExpenseClicked = { navController.navigate(SpendWiseRoutes.Add.route) },
+                dashboardViewModel = dashboardVm
             )
         }
         composable(SpendWiseRoutes.Add.route) {
@@ -54,7 +64,7 @@ fun SpendWiseNavHost(
             TransactionsListScreen(
                 transactionType = com.example.spendwiseai.domain.model.TransactionType.EXPENSE,
                 viewModel = vm,
-                title = "Expenses"
+                title = stringResource(id = com.example.spendwiseai.R.string.expense)
             )
         }
         composable(SpendWiseRoutes.Incomes.route) {
@@ -68,30 +78,43 @@ fun SpendWiseNavHost(
             TransactionsListScreen(
                 transactionType = com.example.spendwiseai.domain.model.TransactionType.INCOME,
                 viewModel = vm,
-                title = "Incomes"
+                title = stringResource(id = com.example.spendwiseai.R.string.income)
             )
         }
         composable(SpendWiseRoutes.Insights.route) {
+            val insightsFactory = remember(appContainer) {
+                InsightsViewModelFactory(
+                    insightsRepository = appContainer.provideInsightsRepository(),
+                    transactionRepository = transactionRepository,
+                    generator = appContainer.provideInsightsGenerator()
+                )
+            }
+            val vm: com.example.spendwiseai.presentation.insights.InsightsViewModel =
+                viewModel(factory = insightsFactory)
             InsightsScreen(
+                viewModel = vm,
                 onBackToHome = { navController.navigate(SpendWiseRoutes.Home.route) }
             )
         }
 
         composable(SpendWiseRoutes.Scan.route) {
-            // TODO (Phase 2): implement the real camera + Gemini Vision receipt parsing flow.
-            // For now, show the same Add-by-text screen to keep the navigation graph valid.
-            val vm: AddExpenseViewModel = viewModel(factory = addExpenseViewModelFactory)
-            AddExpenseScreen(
+            val scanFactory = remember(appContainer) {
+                ScanReceiptViewModelFactory(
+                    visionParser = appContainer.provideReceiptVisionParser(),
+                    transactionRepository = transactionRepository
+                )
+            }
+            val vm: com.example.spendwiseai.presentation.scan.ScanReceiptViewModel = viewModel(factory = scanFactory)
+            ScanReceiptScreen(
                 viewModel = vm,
-                onSaved = {
-                    navController.navigate(
-                        if (vm.uiState.value.preview?.type == com.example.spendwiseai.domain.model.TransactionType.INCOME) {
-                            SpendWiseRoutes.Incomes.route
-                        } else {
-                            SpendWiseRoutes.Expenses.route
-                        }
-                    )
-                }
+                onSavedNavigate = { type ->
+                    navController.navigate(if (type == com.example.spendwiseai.domain.model.TransactionType.INCOME) {
+                        SpendWiseRoutes.Incomes.route
+                    } else {
+                        SpendWiseRoutes.Expenses.route
+                    })
+                },
+                onBack = { navController.navigate(SpendWiseRoutes.Home.route) }
             )
         }
     }

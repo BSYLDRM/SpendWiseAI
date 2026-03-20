@@ -1,13 +1,19 @@
+import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
 
-val geminiApiKey: String =
-    (project.findProperty("GEMINI_API_KEY") as String?)
-        ?: System.getenv("GEMINI_API_KEY")
-        ?: ""
+val geminiApiKey: String = localProperties.getProperty("GEMINI_API_KEY")
+    ?: (project.findProperty("GEMINI_API_KEY") as String?)
+    ?: System.getenv("GEMINI_API_KEY")
+    ?: ""
 
 val escapedGeminiApiKey: String = geminiApiKey.replace("\"", "\\\"")
 
@@ -63,6 +69,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material:material")
+    implementation("com.google.android.material:material:1.9.0")
 
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

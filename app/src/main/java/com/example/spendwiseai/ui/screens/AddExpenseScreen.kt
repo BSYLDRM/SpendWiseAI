@@ -31,7 +31,7 @@ fun AddExpenseScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Add an expense (natural language)",
+            text = "Add a transaction (natural language)",
             style = MaterialTheme.typography.titleLarge
         )
 
@@ -48,7 +48,7 @@ fun AddExpenseScreen(
             onClick = viewModel::submit,
             enabled = !state.isSubmitting,
         ) {
-            Text("Save expense")
+            Text("Save transaction")
         }
 
         if (state.isSubmitting) {

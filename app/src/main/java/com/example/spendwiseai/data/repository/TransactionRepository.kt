@@ -63,5 +63,21 @@ class TransactionRepository(
             )
         )
     }
+
+    suspend fun getTotalAmountForType(type: TransactionType): Double {
+        return transactionDao.getTotalAmountForType(type)
+    }
+
+    suspend fun getAmountBetween(type: TransactionType, startMillis: Long, endMillis: Long): Double {
+        return transactionDao.getAmountBetween(type, startMillis, endMillis)
+    }
+
+    suspend fun getCategoryTotalsBetween(
+        type: TransactionType,
+        startMillis: Long,
+        endMillis: Long
+    ): List<com.example.spendwiseai.data.db.dao.CategoryTotal> {
+        return transactionDao.getCategoryTotalsBetween(type, startMillis, endMillis)
+    }
 }
 
