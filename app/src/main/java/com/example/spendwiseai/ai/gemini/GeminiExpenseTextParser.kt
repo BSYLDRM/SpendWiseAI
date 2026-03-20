@@ -7,8 +7,7 @@ import org.json.JSONObject
 
 class GeminiExpenseTextParser(
     private val apiKey: String,
-    private val fallback: ExpenseTextParser = RegexExpenseTextParser(),
-    private val modelName: String = "gemini-1.5-flash"
+    private val fallback: ExpenseTextParser = RegexExpenseTextParser()
 ) : ExpenseTextParser {
 
     override suspend fun parseExpense(text: String): ParsedTransaction {
@@ -18,7 +17,7 @@ class GeminiExpenseTextParser(
         }
 
         val prompt = buildPrompt(text)
-        val client = GeminiRestClient(apiKey = apiKey, modelName = modelName)
+        val client = GeminiRestClient(apiKey = apiKey)
 
         return try {
             val raw = client.generateContentText(prompt)

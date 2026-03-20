@@ -13,34 +13,24 @@ import android.util.Base64
 import android.util.Log
 
 class GeminiRestClient(
-    private val apiKey: String,
-    modelName: String = "gemini-1.5-flash"
+    private val apiKey: String
 ) {
-    private val resolvedModelName: String =
-        if (modelName == DEFAULT_MODEL_NAME) modelName else DEFAULT_MODEL_NAME
-
     private val tag = "GeminiRestClient"
 
-    private companion object {
-        const val DEFAULT_MODEL_NAME = "gemini-1.5-flash"
-    }
+    // ZORUNLU KILDIĞIMIZ MODEL: Uygulama sadece bunu kullanacak!
+    private val modelName = "gemini-2.5-flash"
 
     suspend fun generateContentText(prompt: String): String = withContext(Dispatchers.IO) {
         val encodedKey = URLEncoder.encode(apiKey, "UTF-8")
         val endpoint =
-            "https://generativelanguage.googleapis.com/v1beta/models/$resolvedModelName:generateContent?key=$encodedKey"
+            "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$encodedKey"
 
         val payload = JSONObject().apply {
             put(
                 "contents",
                 JSONArray().put(
                     JSONObject().apply {
-                        put(
-                            "parts",
-                            JSONArray().put(
-                                JSONObject().apply { put("text", prompt) }
-                            )
-                        )
+                        put("parts", JSONArray().put(JSONObject().apply { put("text", prompt) }))
                     }
                 )
             )
@@ -68,23 +58,19 @@ class GeminiRestClient(
 
         if (responseCode !in 200..299) {
             Log.e(tag, "Gemini text request failed. url=$endpoint code=$responseCode body=$responseBody")
-            throw IllegalStateException("Gemini text request failed. url=$endpoint code=$responseCode body=$responseBody")
+            throw IllegalStateException("Gemini text request failed. code=$responseCode body=$responseBody")
         }
 
         val json = JSONObject(responseBody)
-
-        val text = json
-            .optJSONArray("candidates")
+        val text = json.optJSONArray("candidates")
             ?.optJSONObject(0)
             ?.optJSONObject("content")
             ?.optJSONArray("parts")
             ?.optJSONObject(0)
-            ?.optString("text")
-            .orEmpty()
+            ?.optString("text").orEmpty()
 
         if (text.isBlank()) {
-            // Include response body to help diagnose prompt/model issues.
-            throw IllegalStateException("Gemini response did not contain text. Body=$responseBody")
+            throw IllegalStateException("Gemini response did not contain text.")
         }
 
         text
@@ -97,7 +83,7 @@ class GeminiRestClient(
     ): String = withContext(Dispatchers.IO) {
         val encodedKey = URLEncoder.encode(apiKey, "UTF-8")
         val endpoint =
-            "https://generativelanguage.googleapis.com/v1beta/models/$resolvedModelName:generateContent?key=$encodedKey"
+            "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$encodedKey"
 
         val base64 = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
 
@@ -108,7 +94,8 @@ class GeminiRestClient(
                     JSONObject().apply {
                         put(
                             "parts",
-                            JSONArray().put(JSONObject().apply { put("text", prompt) })
+                            JSONArray()
+                                .put(JSONObject().apply { put("text", prompt) })
                                 .put(
                                     JSONObject().apply {
                                         put(
@@ -148,25 +135,21 @@ class GeminiRestClient(
 
         if (responseCode !in 200..299) {
             Log.e(tag, "Gemini vision request failed. url=$endpoint code=$responseCode body=$responseBody")
-            throw IllegalStateException("Gemini vision request failed. url=$endpoint code=$responseCode body=$responseBody")
+            throw IllegalStateException("Gemini vision request failed. code=$responseCode body=$responseBody")
         }
 
         val json = JSONObject(responseBody)
-
-        val text = json
-            .optJSONArray("candidates")
+        val text = json.optJSONArray("candidates")
             ?.optJSONObject(0)
             ?.optJSONObject("content")
             ?.optJSONArray("parts")
             ?.optJSONObject(0)
-            ?.optString("text")
-            .orEmpty()
+            ?.optString("text").orEmpty()
 
         if (text.isBlank()) {
-            throw IllegalStateException("Gemini response did not contain text. Body=$responseBody")
+            throw IllegalStateException("Gemini response did not contain text.")
         }
 
         text
     }
 }
-
