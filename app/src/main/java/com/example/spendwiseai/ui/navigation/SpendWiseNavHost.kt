@@ -10,13 +10,13 @@ import androidx.compose.ui.res.stringResource
 import com.example.spendwiseai.core.AppContainer
 import com.example.spendwiseai.presentation.SpendWiseViewModelFactory
 import com.example.spendwiseai.presentation.expense.AddExpenseViewModel
+import com.example.spendwiseai.presentation.budget.BudgetViewModelFactory
 import com.example.spendwiseai.presentation.transactions.TransactionsListViewModelFactory
-import com.example.spendwiseai.presentation.scan.ScanReceiptViewModelFactory
 import com.example.spendwiseai.presentation.insights.InsightsViewModelFactory
 import com.example.spendwiseai.ui.screens.AddExpenseScreen
+import com.example.spendwiseai.ui.screens.BudgetScreen
 import com.example.spendwiseai.ui.screens.HomeScreen
 import com.example.spendwiseai.ui.screens.InsightsScreen
-import com.example.spendwiseai.ui.screens.ScanReceiptScreen
 import com.example.spendwiseai.ui.screens.TransactionsListScreen
 import com.example.spendwiseai.presentation.dashboard.DashboardViewModelFactory
 
@@ -25,11 +25,13 @@ fun SpendWiseNavHost(
     navController: NavHostController,
     appContainer: AppContainer
 ) {
-    val addExpenseViewModelFactory = remember(appContainer) {
-        SpendWiseViewModelFactory(appContainer.getAddExpenseUseCase())
-    }
-
     val transactionRepository = appContainer.provideTransactionRepository()
+    val addExpenseViewModelFactory = remember(appContainer) {
+        SpendWiseViewModelFactory(
+            addExpenseUseCase = appContainer.getAddExpenseUseCase(),
+            transactionRepository = transactionRepository
+        )
+    }
 
     NavHost(
         navController = navController,
@@ -41,7 +43,6 @@ fun SpendWiseNavHost(
             }
             val dashboardVm: com.example.spendwiseai.presentation.dashboard.DashboardViewModel = viewModel(factory = dashboardFactory)
             HomeScreen(
-                onScanReceiptClicked = { navController.navigate(SpendWiseRoutes.Scan.route) },
                 onAddExpenseClicked = { navController.navigate(SpendWiseRoutes.Add.route) },
                 dashboardViewModel = dashboardVm
             )
@@ -102,37 +103,28 @@ fun SpendWiseNavHost(
                 onBackToHome = { navController.navigate(SpendWiseRoutes.Home.route) }
             )
         }
-
-        composable(SpendWiseRoutes.Scan.route) {
-            val scanFactory = remember(appContainer) {
-                ScanReceiptViewModelFactory(
-                    visionParser = appContainer.provideReceiptVisionParser(),
+        composable(SpendWiseRoutes.Budget.route) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val factory = remember(appContainer) {
+                BudgetViewModelFactory(
+                    context = context.applicationContext,
                     transactionRepository = transactionRepository
                 )
             }
-            val vm: com.example.spendwiseai.presentation.scan.ScanReceiptViewModel = viewModel(factory = scanFactory)
-            ScanReceiptScreen(
-                viewModel = vm,
-                onSavedNavigate = { type ->
-                    navController.navigate(if (type == com.example.spendwiseai.domain.model.TransactionType.INCOME) {
-                        SpendWiseRoutes.Incomes.route
-                    } else {
-                        SpendWiseRoutes.Expenses.route
-                    })
-                },
-                onBack = { navController.navigate(SpendWiseRoutes.Home.route) }
-            )
+            val vm: com.example.spendwiseai.presentation.budget.BudgetViewModel = viewModel(factory = factory)
+            BudgetScreen(viewModel = vm)
         }
+
     }
 }
 
 private object SpendWiseRoutes {
     val Home = Route("home")
     val Add = Route("add")
-    val Scan = Route("scan")
     val Expenses = Route("expenses")
     val Incomes = Route("incomes")
     val Insights = Route("insights")
+    val Budget = Route("budget")
 
     data class Route(val route: String)
 }

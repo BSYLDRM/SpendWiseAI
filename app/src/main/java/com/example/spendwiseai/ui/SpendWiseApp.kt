@@ -43,6 +43,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import com.example.spendwiseai.core.LocaleManager
@@ -96,6 +97,12 @@ fun SpendWiseApp() {
                     onClick = { navController.navigateToBottomTab(Routes.Insights) },
                     icon = Icons.Default.Analytics,
                     label = "Ipuclari"
+                )
+                BottomNavItem(
+                    selected = currentRoute == Routes.Budget,
+                    onClick = { navController.navigateToBottomTab(Routes.Budget) },
+                    icon = Icons.Default.Flag,
+                    label = "Butce"
                 )
                 BottomNavItem(
                     selected = false,
@@ -207,6 +214,7 @@ private object Routes {
     const val Expenses = "expenses"
     const val Incomes = "incomes"
     const val Insights = "insights"
+    const val Budget = "budget"
 }
 
 private fun androidx.navigation.NavHostController.navigateToBottomTab(route: String) {

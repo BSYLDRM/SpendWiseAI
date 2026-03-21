@@ -1,6 +1,7 @@
 package com.example.spendwiseai.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,12 +23,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,24 +41,28 @@ import com.example.spendwiseai.ui.components.DoughnutChart
 import com.example.spendwiseai.R
 import com.example.spendwiseai.core.LocaleManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import com.example.spendwiseai.ui.theme.NeonGreen
 import com.example.spendwiseai.ui.theme.SoftCoralRed
 
 @Composable
 fun HomeScreen(
-    onScanReceiptClicked: () -> Unit,
     onAddExpenseClicked: () -> Unit,
     dashboardViewModel: DashboardViewModel
 ) {
     val dashboardState by dashboardViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val selectedCurrency = LocaleManager.getCurrency(context)
     var selectedTab by remember { mutableStateOf(0) }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .imePadding(),
+            .imePadding()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            },
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -146,24 +151,18 @@ fun HomeScreen(
         }
 
         item {
-            OutlinedButton(
-                onClick = onScanReceiptClicked,
+            Button(
+                onClick = onAddExpenseClicked,
                 modifier = Modifier
-                    .padding(top = 8.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .height(56.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = stringResource(id = R.string.scan_receipt)
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Harcama Ekle"
                 )
                 Spacer(Modifier.width(10.dp))
-                Text(stringResource(id = R.string.scan_receipt))
-            }
-        }
-
-        item {
-            Button(onClick = onAddExpenseClicked, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(id = R.string.add))
+                Text("Harcama Ekle")
             }
         }
     }

@@ -3,13 +3,11 @@ package com.example.spendwiseai.core
 import android.content.Context
 import androidx.room.Room
 import com.example.spendwiseai.ai.gemini.GeminiExpenseTextParser
-import com.example.spendwiseai.ai.gemini.GeminiReceiptVisionParser
 import com.example.spendwiseai.ai.gemini.GeminiInsightsGenerator
 import com.example.spendwiseai.data.db.AppDatabase
 import com.example.spendwiseai.data.repository.CategoryRepository
 import com.example.spendwiseai.data.repository.InsightsRepository
 import com.example.spendwiseai.data.repository.TransactionRepository
-import com.example.spendwiseai.domain.ai.ReceiptVisionParser
 import com.example.spendwiseai.domain.usecase.AddExpenseUseCase
 
 class AppContainer(context: Context) {
@@ -47,12 +45,6 @@ class AppContainer(context: Context) {
     fun getAddExpenseUseCase(): AddExpenseUseCase = addExpenseUseCaseLazy
 
     fun provideTransactionRepository(): TransactionRepository = transactionRepository
-
-    private val receiptVisionParser: ReceiptVisionParser by lazy {
-        GeminiReceiptVisionParser(apiKey = com.example.spendwiseai.BuildConfig.GEMINI_API_KEY)
-    }
-
-    fun provideReceiptVisionParser(): ReceiptVisionParser = receiptVisionParser
 
     private val insightsGenerator: GeminiInsightsGenerator by lazy {
         GeminiInsightsGenerator(apiKey = com.example.spendwiseai.BuildConfig.GEMINI_API_KEY)

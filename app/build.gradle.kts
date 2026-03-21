@@ -80,6 +80,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation("com.google.mlkit:text-recognition:16.0.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

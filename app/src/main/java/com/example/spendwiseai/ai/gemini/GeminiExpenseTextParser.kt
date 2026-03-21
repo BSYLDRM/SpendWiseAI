@@ -35,40 +35,43 @@ class GeminiExpenseTextParser(
     }
 
     private fun buildPrompt(userText: String): String {
-        val categories = listOf(
-            "Food & Drink",
-            "Groceries",
-            "Transportation",
-            "Entertainment",
-            "Shopping",
-            "Bills & Utilities",
-            "Health",
-            "Other"
-        ).joinToString(", ")
-        val hints = """
-            - Groceries (market, süpermarket): Migros, BİM, A101, ŞOK, Carrefour
-            - Food & Drink (restoran, cafe, kahve, fast food)
-            - Transportation (benzin, akaryakıt, OPET, Shell, BP, otobüs, taksi)
-            - Entertainment (sinema, konser, bar, oyun)
-            - Shopping (giyim, elektronik, AVM)
-            - Bills & Utilities (elektrik, su, doğalgaz, internet)
-            - Health (eczane, hastane, doktor)
-            - Other (hiçbirine uymuyorsa)
-        """.trimIndent()
-
         return """
-            You are a finance data extraction engine.
-            Extract exactly ONE transaction (income or expense) from the user's text.
+            Sen bir finansal analiz asistanısın. Kullanıcının yazdığı metni 
+            analiz et ve aşağıdaki JSON formatında döndür.
 
-            Return ONLY a single JSON object (no markdown, no extra keys) with these fields:
-            - "amount": number (e.g., 150 or 150.50). Do not include currency symbols in this field.
-            - "currency": string (e.g., "TL", "USD", "EUR").
-            - "category": string. Choose one from: $categories
-            - "type": string. Choose either "INCOME" or "EXPENSE".
-            Use these Turkish hints for category detection:
-            $hints
+            Kullanıcı metni: "$userText"
 
-            User text: "$userText"
+            GELİR Mİ GİDER Mİ:
+            - "geldi, aldım maaş, kazandım, ödeme aldım" → INCOME
+            - Geri kalan her şey → EXPENSE
+
+            KATEGORİLER (çok dikkatli seç):
+            - Groceries → market, migros, bim, a101, ekmek, süt, yumurta, 
+              sebze, meyve, manav, alışveriş
+            - Food & Drink → kahve, çay, restoran, cafe, yemek, döner, 
+              burger, pizza, starbucks, tavuk, et, balık, lokanta
+            - Transportation → benzin, akaryakıt, otobüs, metro, taksi, 
+              uber, dolmuş, uçak bileti, araç
+            - Technology → bilgisayar, telefon, tablet, kulaklık, 
+              elektronik, yazılım, uygulama, oyun, steam, teknoloji
+            - Shopping → kıyafet, ayakkabı, çanta, zara, lcw, hm, 
+              mağaza, avm, online alışveriş
+            - Bills & Utilities → elektrik, su, doğalgaz, internet, 
+              fatura, aidat, kira
+            - Health → eczane, ilaç, doktor, hastane, muayene, diş
+            - Education → kitap, kurs, eğitim, okul, ders, sınav
+            - Entertainment → sinema, konser, netflix, spotify, oyun, 
+              bilet, eğlence, gece
+            - Salary → maaş, ikramiye, prim, ödeme aldım
+            - Other → hiçbirine uymuyorsa
+
+            SADECE bu JSON'ı döndür, başka hiçbir şey yazma:
+            {
+              "amount": 250.0,
+              "currency": "TL", 
+              "category": "Groceries",
+              "type": "EXPENSE"
+            }
         """.trimIndent()
     }
 

@@ -2,6 +2,7 @@ package com.example.spendwiseai.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +44,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.spendwiseai.data.db.dao.TransactionWithCategory
@@ -80,6 +83,7 @@ fun TransactionsListScreen(
 ) {
     val uiState = viewModel.uiState
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val selectedCurrency = LocaleManager.getCurrency(context)
     val accent = if (transactionType == TransactionType.EXPENSE) SoftCoralRed else NeonGreen
 
@@ -182,7 +186,11 @@ fun TransactionsListScreen(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            },
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {

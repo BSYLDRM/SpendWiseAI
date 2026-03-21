@@ -18,18 +18,37 @@ class GeminiInsightsGenerator(
 
         val top = categoryTotals.take(5).joinToString(", ") { "${it.categoryName}=${String.format(Locale.US, "%.2f", it.totalAmount)}" }
         val prompt = """
-            You are a personal finance coach.
+            Sen bir kişisel finans uzmanısın. Aşağıdaki verileri analiz et 
+            ve Türkçe detaylı bir rapor yaz.
 
-            User summary:
-            - Total balance (income - expense): $totalBalance
-            - Today's spending: $dailySpending
-            - Category spending totals (last 7 days): $top
+            VERİLER:
+            - Toplam bakiye: $totalBalance TL
+            - Bugünkü harcama: $dailySpending TL
+            - Kategori harcamaları: $top
 
-            Give concise, actionable insights (2-4 short sentences).
-            Include one suggestion to reduce spending and one suggestion to save.
-            If entertainment is highest, mention it explicitly.
+            RAPORU ŞÖYLE YAPI, her bölüm arasında boş satır bırak:
 
-            Return ONLY plain text (no markdown).
+            💰 GENEL DURUM
+            Bakiyeni ve genel finansal durumunu 2 cümleyle değerlendir.
+
+            📊 HARCAMA ANALİZİ  
+            En çok harcadığın kategoriyi belirt, bu normalin üzerinde mi 
+            yoksa makul mü yorumunu yap. Rakamları kullan.
+
+            ⚠️ DİKKAT EDİLMESİ GEREKENLER
+            Azaltılması gereken 2 harcama kalemi ve neden azaltılması 
+            gerektiğini açıkla. Somut rakam ver.
+
+            🎯 BU AY İÇİN HEDEFLER
+            3 madde halinde somut ve ölçülebilir hedef yaz.
+            Her hedef rakam içersin. Örnek: Market harcamasını 
+            500 TL altında tut.
+
+            💡 TASARRUF ÖNERİLERİ
+            Bu kişinin harcama profiline özel 3 pratik tasarruf önerisi.
+            Genel değil, verilere dayalı kişisel öneriler olsun.
+
+            Toplam 15-20 cümle olsun. Samimi, motive edici bir dil kullan.
         """.trimIndent()
 
         return try {
@@ -46,14 +65,29 @@ class GeminiInsightsGenerator(
         categoryTotals: List<CategoryTotal>
     ): String {
         val top = categoryTotals.firstOrNull()
-        val totalExpense = categoryTotals.sumOf { it.totalAmount }
-        val topShare = if (totalExpense > 0) (top?.totalAmount ?: 0.0) / totalExpense else 0.0
+        val second = categoryTotals.getOrNull(1)?.categoryName ?: "Yok"
+        val status = if (totalBalance >= 0) "denge pozitif" else "denge negatif"
+        return """
+            💰 GENEL DURUM
+            Toplam bakiyen ${"%.2f".format(Locale.US, totalBalance)} TL ve şu an $status. Bu tabloyu düzenli takip etmen finansal kontrolü güçlendirir.
 
-        return if (top != null && topShare >= 0.35) {
-            "Your biggest spending share is $${top.categoryName}. Consider trimming it by about 10% next month. Set a weekly cap so you don't drift, and try saving at least 10% of any leftover balance. Today your spending is $dailySpending."
-        } else {
-            "You're building a balanced pattern. Keep reviewing your categories weekly, and aim to save 10% of any positive leftover balance. If you want faster progress, pick one category to reduce by 10% and stick to it for 2 weeks. Today's spending is $dailySpending."
-        }.replace("$$", "$")
+            📊 HARCAMA ANALİZİ
+            En çok harcama yaptığın kategori ${top?.categoryName ?: "Other"} görünüyor. İkinci sırada $second var.
+
+            ⚠️ DİKKAT EDİLMESİ GEREKENLER
+            1) En yüksek kategori harcamasında %10 azaltım dene.
+            2) Günlük harcamayı ${"%.2f".format(Locale.US, dailySpending)} TL seviyesinin altında tutmaya çalış.
+
+            🎯 BU AY İÇİN HEDEFLER
+            1. Haftalık market harcamasını 500 TL altında tut.
+            2. Aylık eğlence harcamasını 1000 TL altında sınırla.
+            3. Her ay en az 1500 TL birikim ayır.
+
+            💡 TASARRUF ÖNERİLERİ
+            1. En yüksek iki kategoride toplam %15 kısma hedefi koy.
+            2. Abonelik ve tekrar eden küçük ödemeleri gözden geçir.
+            3. Günlük harcama limitini yazılı takip et.
+        """.trimIndent()
     }
 }
 
