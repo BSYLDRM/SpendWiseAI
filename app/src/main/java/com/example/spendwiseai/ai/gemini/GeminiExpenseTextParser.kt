@@ -36,25 +36,58 @@ class GeminiExpenseTextParser(
             - maaş, ikramiye, prim, kazandım, geldi, aldım (para), iade, freelance, yemek parası → INCOME
             - Geri kalan her şey → EXPENSE
 
-            GİDER KATEGORİLERİ:
-            - Groceries → market, migros, bim, a101, şok, ekmek, süt, yumurta, sebze, meyve, manav
-            - Food & Drink → kahve, çay, restoran, cafe, yemek, döner, burger, pizza, starbucks
-            - Transportation → benzin, akaryakıt, otobüs, metro, taksi, uber, dolmuş, uçak
-            - Technology → bilgisayar, telefon, tablet, kulaklık, elektronik, yazılım, oyun, steam
-            - Shopping → kıyafet, ayakkabı, çanta, zara, lcw, mağaza, avm
-            - Bills & Utilities → elektrik, su, doğalgaz, internet, fatura, aidat, kira
-            - Health → eczane, ilaç, doktor, hastane, muayene, diş
-            - Education → kitap, kurs, eğitim, okul, ders
-            - Entertainment → sinema, konser, netflix, spotify, oyun, bilet
+            GİDER KATEGORİLERİ (çok dikkatli seç, örneklere bak):
+
+            - Groceries → market, migros, bim, a101, şok, carrefour, ekmek, süt, yumurta,
+              sebze, meyve, manav, et, tavuk, balık, peynir, alışveriş, gıda, erzak
+
+            - Food & Drink → kahve, çay, restoran, cafe, yemek, döner, burger, pizza,
+              starbucks, mcdonalds, kfc, lokanta, bistro, bar, pub, bira, alkol, içki,
+              kokteyl, şarap, viski, rakı, içecek, meşrubat, su (şişe), meyve suyu
+
+            - Transportation → benzin, motorin, mazot, akaryakıt, yakıt, otobüs, metro,
+              taksi, uber, dolmuş, uçak, tren, vapur, bilet, otogar, otopark, servis,
+              opet, shell, bp, total, petrol ofisi, araç, lastik, oto yıkama
+
+            - Technology → bilgisayar, laptop, telefon, tablet, kulaklık, klavye, mouse,
+              monitör, elektronik, yazılım, uygulama, oyun, steam, apple, samsung, xbox,
+              playstation, abonelik, domain, hosting
+
+            - Shopping → kıyafet, ayakkabı, çanta, cüzdan, saat, gözlük, takı, aksesuar,
+              zara, lcw, h&m, mango, koton, bershka, pull&bear, mağaza, avm, online alışveriş,
+              trendyol, hepsiburada, amazon, n11
+
+            - Bills & Utilities → elektrik, su, doğalgaz, internet, telefon faturası,
+              fatura, aidat, apartman, sigorta, vergi, kredi kartı
+
+            - Rent → kira, ev kirası, konut, daire, kiracı
+
+            - Health → eczane, ilaç, doktor, hastane, muayene, diş, gözlük,
+              check-up, tahlil, reçete, vitamin, takviye, spor salonu üyelik
+
+            - Education → kitap, kurs, eğitim, okul, ders, sınav, üniversite,
+              özel ders, dershane, seminer, sertifika, udemy, coursera
+
+            - Entertainment → sinema, konser, tiyatro, netflix, spotify, youtube premium,
+              oyun konsolu oyunu, bilet, eğlence, lunapark, müze, gezi, tatil, otel
 
             GELİR KATEGORİLERİ:
-            - Salary → maaş, ikramiye, prim, aylık
-            - Freelance → freelance, proje ücreti, danışmanlık, yazılım geliri
-            - Refund → iade, geri ödeme, cashback, iptal iadesi
-            - Meal Allowance → yemek parası, yemek kartı, yemek yardımı
-            - Investment → faiz, temettü, kira geliri, yatırım getirisi
-            - Gift → hediye, bağış, harçlık
-            - Other Income → diğer gelir
+            - Salary → maaş, ikramiye, prim, aylık, yıllık izin ücreti
+            - Freelance → freelance, proje ücreti, danışmanlık, yazılım geliri, serbest çalışma
+            - Refund → iade, geri ödeme, cashback, iptal iadesi, para iadesi
+            - Meal Allowance → yemek parası, yemek kartı, yemek yardımı, yemek ücreti
+            - Investment → faiz, temettü, kira geliri, yatırım getirisi, hisse senedi
+            - Gift → hediye, bağış, harçlık, para hediyesi
+            - Other Income → diğer gelir, ek iş, part-time
+
+            ÖNEMLI KURALLAR:
+            - Bira, şarap, rakı, viski, alkol → Food & Drink (içki de yiyecek içecek kategorisi)
+            - Mazot, motorin → Transportation (benzin ile aynı)
+            - Kira, ev kirası → Rent (Other değil!)
+            - Bar, pub → Food & Drink
+            - Spor salonu → Health
+            - Netflix, Spotify → Entertainment
+            - Para birimi belirtilmemişse TL yaz
 
             Kullanıcı metni: "$userText"
         """.trimIndent()

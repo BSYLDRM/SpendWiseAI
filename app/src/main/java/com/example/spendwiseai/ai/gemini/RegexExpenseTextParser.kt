@@ -23,60 +23,106 @@ class RegexExpenseTextParser : ExpenseTextParser {
     }
 
     private fun extractAmount(text: String): Double {
-        // Matches "150", "150.50", "150,50".
         val regex = Regex("""-?\d+(?:[.,]\d+)?""")
         val match = regex.find(text) ?: error("Could not find an amount in: '$text'")
-        val raw = match.value
-        return raw.replace(',', '.').toDouble()
+        return match.value.replace(',', '.').toDouble()
     }
 
     private fun extractCurrency(text: String): String {
         val upper = text.uppercase()
-
         return when {
-            upper.contains("₺") || upper.contains(" TL") || Regex("""\bTL\b""").containsMatchIn(upper) -> "TL"
-            upper.contains(" TRY") || upper.contains("TRY") -> "TRY"
-            upper.contains("€") || upper.contains(" EUR") || upper.contains("EUR") -> "EUR"
-            upper.contains("$") || upper.contains(" USD") || upper.contains("USD") -> "USD"
-            upper.contains("£") || upper.contains(" GBP") || upper.contains("GBP") -> "GBP"
-            else -> "UNK"
+            upper.contains("₺") || upper.contains(" TL") ||
+                    Regex("""\bTL\b""").containsMatchIn(upper) -> "TL"
+            upper.contains("TRY") -> "TRY"
+            upper.contains("€") || upper.contains("EUR") -> "EUR"
+            upper.contains("$") || upper.contains("USD") -> "USD"
+            upper.contains("£") || upper.contains("GBP") -> "GBP"
+            else -> "TL"
         }
     }
 
     private fun inferCategory(text: String): String {
         val lower = text.lowercase()
+
+        // Gelir kategorileri
+        if (inferType(text) == TransactionType.INCOME) {
+            return when {
+                listOf("maaş", "ikramiye", "prim", "aylık").any { lower.contains(it) } -> "Salary"
+                listOf("freelance", "proje", "danışmanlık").any { lower.contains(it) } -> "Freelance"
+                listOf("iade", "geri ödeme", "cashback").any { lower.contains(it) } -> "Refund"
+                listOf("yemek parası", "yemek kartı", "yemek yardımı").any { lower.contains(it) } -> "Meal Allowance"
+                listOf("faiz", "temettü", "yatırım").any { lower.contains(it) } -> "Investment"
+                listOf("hediye", "bağış", "harçlık").any { lower.contains(it) } -> "Gift"
+                else -> "Other Income"
+            }
+        }
+
+        // Gider kategorileri — sıralama önemli, önce spesifik olanlar
         return when {
+            // Kira
+            listOf("kira", "ev kirası", "konut kirası").any { lower.contains(it) } ->
+                "Rent"
+
+            // Food & Drink — alkol dahil
             listOf(
-                "restoran", "lokanta", "restaurant", "cafe", "kahve", "coffee", "starbucks",
-                "yemek", "doner", "doner", "burger", "pizza", "icecek", "içecek", "drink", "latte"
-            ).any { lower.contains(it) } ->
-                "Food & Drink"
+                "bira", "alkol", "içki", "şarap", "viski", "rakı", "votka", "cin",
+                "kokteyl", "bar", "pub", "restoran", "lokanta", "cafe", "kahve",
+                "starbucks", "mcdonalds", "kfc", "burger", "pizza", "döner",
+                "yemek", "içecek", "meşrubat"
+            ).any { lower.contains(it) } -> "Food & Drink"
+
+            // Groceries
             listOf(
-                "migros", "bim", "a101", "sok", "şok", "carrefour", "market", "manav",
-                "ekmek", "sut", "süt", "sebze", "meyve", "alisveris", "alışveriş",
-                "grocery", "supermarket", "groceries"
+                "migros", "bim", "a101", "şok", "carrefour", "market", "manav",
+                "ekmek", "süt", "yumurta", "sebze", "meyve", "et", "tavuk",
+                "balık", "peynir", "gıda", "erzak"
             ).any { lower.contains(it) } -> "Groceries"
+
+            // Transportation — mazot dahil
             listOf(
-                "benzin", "motorin", "akaryakit", "akaryakıt", "opet", "shell", "bp",
-                "petrol", "otobus", "otobüs", "metro", "taksi", "uber", "dolmus", "dolmuş",
-                "bus", "train", "transport"
+                "benzin", "motorin", "mazot", "akaryakıt", "yakıt",
+                "opet", "shell", "bp", "total", "petrol",
+                "otobüs", "metro", "taksi", "uber", "dolmuş",
+                "uçak", "tren", "vapur", "otogar", "otopark",
+                "lastik", "oto yıkama", "araç"
             ).any { lower.contains(it) } -> "Transportation"
+
+            // Health
             listOf(
-                "bar", "pub", "gece", "konser", "sinema", "netflix", "spotify", "oyun",
-                "eglence", "eğlence", "movie", "cinema", "game", "concert"
-            ).any { lower.contains(it) } -> "Entertainment"
-            listOf("shop", "clothes", "clothing", "store", "shopping").any { lower.contains(it) } -> "Shopping"
-            listOf(
-                "elektrik", "su", "dogalgaz", "doğalgaz", "internet", "fatura", "aidat",
-                "electric", "water", "bill", "utility"
-            ).any { lower.contains(it) } -> "Bills & Utilities"
-            listOf("rent", "landlord", "apartment").any { lower.contains(it) } -> "Rent"
-            listOf(
-                "eczane", "doktor", "hastane", "ilac", "ilaç", "muayene",
-                "doctor", "pharmacy", "health"
+                "eczane", "ilaç", "doktor", "hastane", "muayene",
+                "diş", "tahlil", "reçete", "vitamin", "spor salonu"
             ).any { lower.contains(it) } -> "Health"
-            listOf("school", "education", "course").any { lower.contains(it) } -> "Education"
-            listOf("travel", "flight", "hotel", "trip").any { lower.contains(it) } -> "Travel"
+
+            // Bills & Utilities
+            listOf(
+                "elektrik", "su faturası", "doğalgaz", "internet faturası",
+                "telefon faturası", "fatura", "aidat", "sigorta", "vergi"
+            ).any { lower.contains(it) } -> "Bills & Utilities"
+
+            // Entertainment
+            listOf(
+                "sinema", "konser", "tiyatro", "netflix", "spotify",
+                "bilet", "eğlence", "otel", "tatil", "müze"
+            ).any { lower.contains(it) } -> "Entertainment"
+
+            // Technology
+            listOf(
+                "bilgisayar", "laptop", "telefon", "tablet", "kulaklık",
+                "elektronik", "yazılım", "oyun", "steam", "apple", "samsung"
+            ).any { lower.contains(it) } -> "Technology"
+
+            // Shopping
+            listOf(
+                "kıyafet", "ayakkabı", "çanta", "zara", "lcw", "h&m",
+                "mango", "koton", "mağaza", "avm", "trendyol", "hepsiburada"
+            ).any { lower.contains(it) } -> "Shopping"
+
+            // Education
+            listOf(
+                "kitap", "kurs", "eğitim", "okul", "ders",
+                "üniversite", "sınav", "udemy"
+            ).any { lower.contains(it) } -> "Education"
+
             else -> "Other"
         }
     }
@@ -84,13 +130,12 @@ class RegexExpenseTextParser : ExpenseTextParser {
     private fun inferType(text: String): TransactionType {
         val lower = text.lowercase()
         return when {
-            listOf("salary", "income", "received", "payment received", "paycheck", "refund", "returned", "sold").any {
-                lower.contains(it)
-            } -> TransactionType.INCOME
-            listOf("spent", "expense", "paid", "buy", "bought", "shopping").any { lower.contains(it) } ->
-                TransactionType.EXPENSE
+            listOf(
+                "maaş", "geldi", "kazandım", "aldım", "ikramiye", "prim",
+                "iade", "freelance", "yemek parası", "salary", "income",
+                "received", "refund", "returned"
+            ).any { lower.contains(it) } -> TransactionType.INCOME
             else -> TransactionType.EXPENSE
         }
     }
 }
-
