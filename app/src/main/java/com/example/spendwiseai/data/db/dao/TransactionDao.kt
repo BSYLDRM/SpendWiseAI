@@ -44,10 +44,28 @@ interface TransactionDao {
         """
         SELECT COALESCE(SUM(amount), 0)
         FROM transactions
+        WHERE type = :type
+        """
+    )
+    fun observeTotalAmountForType(type: TransactionType): Flow<Double>
+
+    @Query(
+        """
+        SELECT COALESCE(SUM(amount), 0)
+        FROM transactions
         WHERE type = :type AND dateMillis >= :startMillis AND dateMillis < :endMillis
         """
     )
     suspend fun getAmountBetween(type: TransactionType, startMillis: Long, endMillis: Long): Double
+
+    @Query(
+        """
+        SELECT COALESCE(SUM(amount), 0)
+        FROM transactions
+        WHERE type = :type AND dateMillis >= :startMillis AND dateMillis < :endMillis
+        """
+    )
+    fun observeAmountBetween(type: TransactionType, startMillis: Long, endMillis: Long): Flow<Double>
 
     @Query(
         """
@@ -101,5 +119,22 @@ interface TransactionDao {
         startMillis: Long,
         endMillis: Long
     ): List<CategoryTotal>
+
+    @Query(
+        """
+        SELECT c.name AS categoryName,
+               COALESCE(SUM(t.amount), 0) AS totalAmount
+        FROM transactions t
+        INNER JOIN categories c ON c.id = t.categoryId
+        WHERE t.type = :type AND t.dateMillis >= :startMillis AND t.dateMillis < :endMillis
+        GROUP BY c.id
+        ORDER BY totalAmount DESC
+        """
+    )
+    fun observeCategoryTotalsBetween(
+        type: TransactionType,
+        startMillis: Long,
+        endMillis: Long
+    ): Flow<List<CategoryTotal>>
 }
 

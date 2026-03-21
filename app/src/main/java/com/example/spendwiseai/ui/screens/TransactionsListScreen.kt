@@ -1,6 +1,7 @@
 package com.example.spendwiseai.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.DismissDirection
@@ -48,9 +50,14 @@ import com.example.spendwiseai.data.db.dao.TransactionWithCategory
 import com.example.spendwiseai.domain.model.TransactionType
 import com.example.spendwiseai.presentation.transactions.TransactionsListViewModel
 import com.example.spendwiseai.R
+import com.example.spendwiseai.core.LocaleManager
 import com.example.spendwiseai.ui.theme.NeonGreen
 import com.example.spendwiseai.ui.theme.SoftCoralRed
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -72,6 +79,8 @@ fun TransactionsListScreen(
     onNavigateBackHome: () -> Unit = {}
 ) {
     val uiState = viewModel.uiState
+    val context = LocalContext.current
+    val selectedCurrency = LocaleManager.getCurrency(context)
     val accent = if (transactionType == TransactionType.EXPENSE) SoftCoralRed else NeonGreen
 
     // Local UI state for edit/delete dialogs
@@ -82,12 +91,17 @@ fun TransactionsListScreen(
     // Collecting uiState via `value` would require collectAsState; uiState is a StateFlow in VM.
     // To keep this file lightweight and avoid adding more plumbing, we read it via Compose runtime.
     val stateValue by uiState.collectAsState()
+    val today = LocalDate.now()
+    val zone = ZoneId.systemDefault()
+    val grouped = stateValue.transactions.groupBy { tx ->
+        Instant.ofEpochMilli(tx.dateMillis).atZone(zone).toLocalDate()
+    }.toSortedMap(compareByDescending { it })
 
     if (deleteCandidate != null) {
         AlertDialog(
             onDismissRequest = { deleteCandidate = null },
-            title = { Text("Delete transaction?") },
-            text = { Text("This action cannot be undone.") },
+            title = { Text("Islem silinsin mi?") },
+            text = { Text("Bu islem geri alinamaz.") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -98,7 +112,7 @@ fun TransactionsListScreen(
                 ) { Text(stringResource(id = R.string.delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { deleteCandidate = null }) { Text("Cancel") }
+                TextButton(onClick = { deleteCandidate = null }) { Text("Iptal") }
             }
         )
     }
@@ -110,29 +124,29 @@ fun TransactionsListScreen(
                 editError = null
                 editDraft = null
             },
-            title = { Text("Edit transaction") },
+            title = { Text("Islemi duzenle") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
                         value = draft.amount,
                         onValueChange = { editDraft = draft.copy(amount = it); editError = null },
-                        label = { Text("Amount") },
+                        label = { Text("Tutar") },
                         singleLine = true
                     )
                     OutlinedTextField(
                         value = draft.currency,
                         onValueChange = { editDraft = draft.copy(currency = it); editError = null },
-                        label = { Text("Currency (e.g., TL)") }
+                        label = { Text("Para birimi (orn. TL)") }
                     )
                     OutlinedTextField(
                         value = draft.categoryName,
                         onValueChange = { editDraft = draft.copy(categoryName = it); editError = null },
-                        label = { Text("Category") }
+                        label = { Text("Kategori") }
                     )
                     OutlinedTextField(
                         value = draft.description,
                         onValueChange = { editDraft = draft.copy(description = it); editError = null },
-                        label = { Text("Description") },
+                        label = { Text("Aciklama") },
                         minLines = 2,
                         maxLines = 4
                     )
@@ -144,7 +158,7 @@ fun TransactionsListScreen(
                     onClick = {
                         val amount = draft.amount.replace(',', '.').toDoubleOrNull()
                         if (amount == null || draft.currency.isBlank() || draft.categoryName.isBlank()) {
-                            editError = "Please provide valid amount/currency/category."
+                            editError = "Lutfen gecerli tutar/para birimi/kategori girin."
                             return@TextButton
                         }
 
@@ -159,10 +173,10 @@ fun TransactionsListScreen(
                         editError = null
                         editDraft = null
                     }
-                ) { Text("Save") }
+                ) { Text("Kaydet") }
             },
             dismissButton = {
-                TextButton(onClick = { editError = null; editDraft = null }) { Text("Cancel") }
+                TextButton(onClick = { editError = null; editDraft = null }) { Text("Iptal") }
             }
         )
     }
@@ -175,98 +189,174 @@ fun TransactionsListScreen(
         item {
             Text(text = title, style = MaterialTheme.typography.headlineSmall)
         }
-        items(stateValue.transactions.size) { index ->
-            val tx = stateValue.transactions[index]
-
-            val dismissState = rememberDismissState(confirmStateChange = { dismissValue ->
-                if (dismissValue == androidx.compose.material.DismissValue.DismissedToStart ||
-                    dismissValue == androidx.compose.material.DismissValue.DismissedToEnd
-                ) {
-                    deleteCandidate = tx
-                    false
-                } else {
-                    true
+        grouped.forEach { (date, txs) ->
+            if (date == today) {
+                item {
+                    Text("Bugun", style = MaterialTheme.typography.titleMedium)
                 }
-            })
+                items(txs, key = { it.id }) { tx ->
+                    TransactionDetailCard(
+                        tx = tx,
+                        currency = selectedCurrency,
+                        accent = accent,
+                        onEdit = {
+                            editError = null
+                            editDraft = TransactionEditDraft(
+                                id = tx.id,
+                                amount = tx.amount.toString(),
+                                currency = tx.currency,
+                                categoryName = tx.categoryName,
+                                description = tx.description,
+                                dateMillis = tx.dateMillis
+                            )
+                        },
+                        onDelete = { deleteCandidate = tx }
+                    )
+                }
+            } else {
+                item {
+                    GroupedDayCard(
+                        date = date,
+                        transactions = txs,
+                        currency = selectedCurrency,
+                        accent = accent,
+                        isYesterday = date == today.minusDays(1),
+                        onEdit = { tx ->
+                            editError = null
+                            editDraft = TransactionEditDraft(
+                                id = tx.id,
+                                amount = tx.amount.toString(),
+                                currency = tx.currency,
+                                categoryName = tx.categoryName,
+                                description = tx.description,
+                                dateMillis = tx.dateMillis
+                            )
+                        },
+                        onDelete = { tx -> deleteCandidate = tx }
+                    )
+                }
+            }
+        }
+    }
+}
 
-            SwipeToDismiss(
-                state = dismissState,
-                directions = setOf(
-                    androidx.compose.material.DismissDirection.EndToStart
-                ),
-                background = {
-                    val bgColor = accent.copy(alpha = 0.25f)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(bgColor)
-                            .padding(16.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.delete),
-                            tint = MaterialTheme.colorScheme.error
-                        )
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun TransactionDetailCard(
+    tx: TransactionWithCategory,
+    currency: String,
+    accent: Color,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val dismissState = rememberDismissState(confirmStateChange = { dismissValue ->
+        if (dismissValue == androidx.compose.material.DismissValue.DismissedToStart ||
+            dismissValue == androidx.compose.material.DismissValue.DismissedToEnd
+        ) {
+            onDelete()
+            false
+        } else {
+            true
+        }
+    })
+    SwipeToDismiss(
+        state = dismissState,
+        directions = setOf(DismissDirection.EndToStart),
+        background = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(accent.copy(alpha = 0.25f))
+                    .padding(16.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Sil",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        dismissContent = {
+            Card(
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = tx.categoryName, style = MaterialTheme.typography.titleMedium)
+                        Text(text = tx.description, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(text = formatDate(tx.dateMillis), style = MaterialTheme.typography.labelSmall)
                     }
-                },
-                dismissContent = {
-                    Card(
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = tx.categoryName,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Text(
-                                    text = tx.description,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    maxLines = 1
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = formatDate(tx.dateMillis),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = formatAmount(tx.amount, tx.currency),
-                                    color = accent,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                IconButton(onClick = {
-                                    editError = null
-                                    editDraft = TransactionEditDraft(
-                                        id = tx.id,
-                                        amount = tx.amount.toString(),
-                                        currency = tx.currency,
-                                        categoryName = tx.categoryName,
-                                        description = tx.description,
-                                        dateMillis = tx.dateMillis
-                                    )
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = "Edit",
-                                        tint = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = formatAmount(tx.amount, currency),
+                            color = accent,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        IconButton(onClick = onEdit) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Duzenle")
                         }
                     }
                 }
+            }
+        }
+    )
+}
+
+@Composable
+private fun GroupedDayCard(
+    date: LocalDate,
+    transactions: List<TransactionWithCategory>,
+    currency: String,
+    accent: Color,
+    isYesterday: Boolean,
+    onEdit: (TransactionWithCategory) -> Unit,
+    onDelete: (TransactionWithCategory) -> Unit
+) {
+    var expanded by remember(date) { mutableStateOf(false) }
+    val total = transactions.sumOf { it.amount }
+    val dateLabel = if (isYesterday) "Dun" else date.format(
+        DateTimeFormatter.ofPattern("d MMMM", Locale.forLanguageTag("tr-TR"))
+    )
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "$dateLabel - ${transactions.size} islem - ${formatAmount(total, currency)}",
+                style = MaterialTheme.typography.titleSmall,
+                color = accent
             )
+            if (expanded) {
+                transactions.forEach { tx ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(tx.categoryName, style = MaterialTheme.typography.bodyMedium)
+                            Text(tx.description, style = MaterialTheme.typography.labelSmall)
+                        }
+                        Text(formatAmount(tx.amount, currency), color = accent)
+                        IconButton(onClick = { onEdit(tx) }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Duzenle")
+                        }
+                        IconButton(onClick = { onDelete(tx) }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Sil")
+                        }
+                    }
+                }
+            }
         }
     }
 }

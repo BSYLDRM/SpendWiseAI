@@ -3,6 +3,7 @@ package com.example.spendwiseai.presentation.expense
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.spendwiseai.domain.usecase.AddExpenseUseCase
+import com.example.spendwiseai.domain.model.TransactionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,8 +25,16 @@ class AddExpenseViewModel(
         )
     }
 
+    fun onTypeSelected(type: TransactionType) {
+        _uiState.value = _uiState.value.copy(
+            selectedType = type,
+            errorMessage = null
+        )
+    }
+
     fun submit() {
-        val text = _uiState.value.inputText.trim()
+        val state = _uiState.value
+        val text = state.inputText.trim()
         if (text.isBlank()) return
 
         _uiState.value = _uiState.value.copy(
@@ -37,7 +46,10 @@ class AddExpenseViewModel(
 
         viewModelScope.launch {
             try {
-                val result = addExpenseUseCase.execute(userText = text)
+                val result = addExpenseUseCase.execute(
+                    userText = text,
+                    forcedType = state.selectedType
+                )
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
                     preview = result.parsed,

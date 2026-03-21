@@ -46,15 +46,35 @@ class RegexExpenseTextParser : ExpenseTextParser {
     private fun inferCategory(text: String): String {
         val lower = text.lowercase()
         return when {
-            listOf("coffee", "cafe", "restaurant", "sandwich", "burger", "tea", "drink", "latte").any { lower.contains(it) } ->
+            listOf(
+                "restoran", "lokanta", "restaurant", "cafe", "kahve", "coffee", "starbucks",
+                "yemek", "doner", "doner", "burger", "pizza", "icecek", "içecek", "drink", "latte"
+            ).any { lower.contains(it) } ->
                 "Food & Drink"
-            listOf("grocery", "market", "supermarket", "groceries").any { lower.contains(it) } -> "Groceries"
-            listOf("bus", "metro", "train", "uber", "taxi", "transport").any { lower.contains(it) } -> "Transportation"
-            listOf("movie", "cinema", "game", "concert").any { lower.contains(it) } -> "Entertainment"
+            listOf(
+                "migros", "bim", "a101", "sok", "şok", "carrefour", "market", "manav",
+                "ekmek", "sut", "süt", "sebze", "meyve", "alisveris", "alışveriş",
+                "grocery", "supermarket", "groceries"
+            ).any { lower.contains(it) } -> "Groceries"
+            listOf(
+                "benzin", "motorin", "akaryakit", "akaryakıt", "opet", "shell", "bp",
+                "petrol", "otobus", "otobüs", "metro", "taksi", "uber", "dolmus", "dolmuş",
+                "bus", "train", "transport"
+            ).any { lower.contains(it) } -> "Transportation"
+            listOf(
+                "bar", "pub", "gece", "konser", "sinema", "netflix", "spotify", "oyun",
+                "eglence", "eğlence", "movie", "cinema", "game", "concert"
+            ).any { lower.contains(it) } -> "Entertainment"
             listOf("shop", "clothes", "clothing", "store", "shopping").any { lower.contains(it) } -> "Shopping"
-            listOf("electric", "water", "internet", "bill", "utility").any { lower.contains(it) } -> "Bills & Utilities"
+            listOf(
+                "elektrik", "su", "dogalgaz", "doğalgaz", "internet", "fatura", "aidat",
+                "electric", "water", "bill", "utility"
+            ).any { lower.contains(it) } -> "Bills & Utilities"
             listOf("rent", "landlord", "apartment").any { lower.contains(it) } -> "Rent"
-            listOf("doctor", "pharmacy", "health").any { lower.contains(it) } -> "Health"
+            listOf(
+                "eczane", "doktor", "hastane", "ilac", "ilaç", "muayene",
+                "doctor", "pharmacy", "health"
+            ).any { lower.contains(it) } -> "Health"
             listOf("school", "education", "course").any { lower.contains(it) } -> "Education"
             listOf("travel", "flight", "hotel", "trip").any { lower.contains(it) } -> "Travel"
             else -> "Other"

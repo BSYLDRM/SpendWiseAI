@@ -68,8 +68,16 @@ class TransactionRepository(
         return transactionDao.getTotalAmountForType(type)
     }
 
+    fun observeTotalAmountForType(type: TransactionType): Flow<Double> {
+        return transactionDao.observeTotalAmountForType(type)
+    }
+
     suspend fun getAmountBetween(type: TransactionType, startMillis: Long, endMillis: Long): Double {
         return transactionDao.getAmountBetween(type, startMillis, endMillis)
+    }
+
+    fun observeAmountBetween(type: TransactionType, startMillis: Long, endMillis: Long): Flow<Double> {
+        return transactionDao.observeAmountBetween(type, startMillis, endMillis)
     }
 
     suspend fun getCategoryTotalsBetween(
@@ -78,6 +86,14 @@ class TransactionRepository(
         endMillis: Long
     ): List<com.example.spendwiseai.data.db.dao.CategoryTotal> {
         return transactionDao.getCategoryTotalsBetween(type, startMillis, endMillis)
+    }
+
+    fun observeCategoryTotalsBetween(
+        type: TransactionType,
+        startMillis: Long,
+        endMillis: Long
+    ): Flow<List<com.example.spendwiseai.data.db.dao.CategoryTotal>> {
+        return transactionDao.observeCategoryTotalsBetween(type, startMillis, endMillis)
     }
 }
 

@@ -1,20 +1,18 @@
 <resources>
-    <string name="app_name">Smart Spend &amp; Save</string>
+    <string name="app_name">Akilli Harca ve Biriktir</string>
 
-    <!-- Core labels (EN default) -->
-    <string name="total_balance">Total Balance</string>
-    <string name="daily_spending">Daily Spending</string>
-    <string name="scan_receipt">Scan Receipt</string>
-    <string name="income">Income</string>
-    <string name="expense">Expense</string>
-    <string name="add">Add</string>
-    <string name="delete">Delete</string>
+    <string name="total_balance">Toplam Bakiye</string>
+    <string name="daily_spending">Gunluk Harcama</string>
+    <string name="scan_receipt">Fis Tara</string>
+    <string name="income">Gelir</string>
+    <string name="expense">Gider</string>
+    <string name="add">Islem Ekle</string>
+    <string name="delete">Sil</string>
 
-    <!-- Receipt scanning -->
-    <string name="analyzing_receipt">Analyzing receipt…</string>
-    <string name="confirm_and_save">Confirm &amp; Save</string>
-    <string name="take_receipt_photo">Take receipt photo</string>
-    <string name="camera">Camera</string>
-    <string name="receipt_preview">Receipt preview</string>
-    <string name="ai_parsed_preview">AI Parsed Preview</string>
+    <string name="analyzing_receipt">Fis analiz ediliyor...</string>
+    <string name="confirm_and_save">Onayla ve Kaydet</string>
+    <string name="take_receipt_photo">Fis fotografi cek</string>
+    <string name="camera">Kamera</string>
+    <string name="receipt_preview">Fis onizlemesi</string>
+    <string name="ai_parsed_preview">YZ Cozumleme Onizlemesi</string>
 </resources>

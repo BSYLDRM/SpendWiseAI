@@ -43,11 +43,18 @@ class GeminiExpenseTextParser(
             "Shopping",
             "Bills & Utilities",
             "Health",
-            "Rent",
-            "Education",
-            "Travel",
             "Other"
         ).joinToString(", ")
+        val hints = """
+            - Groceries (market, süpermarket): Migros, BİM, A101, ŞOK, Carrefour
+            - Food & Drink (restoran, cafe, kahve, fast food)
+            - Transportation (benzin, akaryakıt, OPET, Shell, BP, otobüs, taksi)
+            - Entertainment (sinema, konser, bar, oyun)
+            - Shopping (giyim, elektronik, AVM)
+            - Bills & Utilities (elektrik, su, doğalgaz, internet)
+            - Health (eczane, hastane, doktor)
+            - Other (hiçbirine uymuyorsa)
+        """.trimIndent()
 
         return """
             You are a finance data extraction engine.
@@ -58,47 +65,47 @@ class GeminiExpenseTextParser(
             - "currency": string (e.g., "TL", "USD", "EUR").
             - "category": string. Choose one from: $categories
             - "type": string. Choose either "INCOME" or "EXPENSE".
+            Use these Turkish hints for category detection:
+            $hints
 
             User text: "$userText"
         """.trimIndent()
     }
 
     private fun parseJsonFromModel(raw: String): ParsedTransaction? {
-        val trimmed = raw.trim()
+        return try {
+            val jsonText = extractJsonObject(raw) ?: return null
+            val json = JSONObject(jsonText)
 
-        // Model output might be wrapped in ```json ... ```. We only need the first {...} block.
-        val start = trimmed.indexOf('{')
-        val end = trimmed.lastIndexOf('}')
-        if (start == -1 || end == -1 || end <= start) return null
+            val amount = json.optDouble("amount", Double.NaN)
+            val currency = json.optString("currency", "").trim()
+            val category = json.optString("category", "").trim()
+            val type = when (json.optString("type", "").trim().uppercase()) {
+                "INCOME" -> TransactionType.INCOME
+                "EXPENSE" -> TransactionType.EXPENSE
+                else -> return null
+            }
 
-        val jsonText = trimmed.substring(start, end + 1)
-        val obj = JSONObject(jsonText)
+            if (amount.isNaN() || amount <= 0.0 || currency.isBlank() || category.isBlank()) {
+                return null
+            }
 
-        val amountValue = obj.opt("amount")
-        val amount = when (amountValue) {
-            is Number -> amountValue.toDouble()
-            is String -> amountValue.replace(',', '.').toDoubleOrNull()
-            else -> null
-        } ?: return null
-
-        val currency = obj.optString("currency", "").trim()
-        val category = obj.optString("category", "").trim()
-
-        val typeRaw = obj.optString("type", "").trim().uppercase()
-        val type = when (typeRaw) {
-            "INCOME" -> TransactionType.INCOME
-            "EXPENSE" -> TransactionType.EXPENSE
-            else -> TransactionType.EXPENSE
+            ParsedTransaction(
+                amount = amount,
+                currency = currency,
+                category = category,
+                type = type
+            )
+        } catch (_: Throwable) {
+            null
         }
+    }
 
-        if (currency.isBlank() || category.isBlank()) return null
-
-        return ParsedTransaction(
-            amount = amount,
-            currency = currency,
-            category = category,
-            type = type
-        )
+    private fun extractJsonObject(raw: String): String? {
+        val start = raw.indexOf('{')
+        val end = raw.lastIndexOf('}')
+        if (start == -1 || end == -1 || end <= start) return null
+        return raw.substring(start, end + 1).trim()
     }
 }
 

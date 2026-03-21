@@ -1,21 +1,22 @@
 package com.example.spendwiseai.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,14 +28,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.example.spendwiseai.presentation.dashboard.DashboardViewModel
 import com.example.spendwiseai.ui.components.DoughnutChart
-import com.example.spendwiseai.core.LocaleManager
-import android.app.Activity
-import androidx.compose.ui.platform.LocalContext
 import com.example.spendwiseai.R
+import com.example.spendwiseai.core.LocaleManager
+import androidx.compose.ui.platform.LocalContext
+import com.example.spendwiseai.ui.theme.NeonGreen
+import com.example.spendwiseai.ui.theme.SoftCoralRed
 
 @Composable
 fun HomeScreen(
@@ -44,89 +51,121 @@ fun HomeScreen(
 ) {
     val dashboardState by dashboardViewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val isTurkish = LocaleManager.getLanguageTag(context) == "tr"
+    val selectedCurrency = LocaleManager.getCurrency(context)
+    var selectedTab by remember { mutableStateOf(0) }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxWidth()
+            .imePadding(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        item {
             Text(
-                text = "Smart Spend & Save",
+                text = stringResource(id = R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Switch(
-                checked = isTurkish,
-                onCheckedChange = { checked ->
-                    val newTag = if (checked) "tr" else "en"
-                    LocaleManager.setLanguageTag(context, newTag)
-                    (context as? Activity)?.recreate()
-                }
             )
         }
 
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (dashboardState.isLoading) {
-                    RowLoading()
-                } else {
-                    val balanceColor =
-                        if (dashboardState.totalBalance >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+        item {
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (dashboardState.isLoading) {
+                        RowLoading()
+                    } else {
+                        val balanceColor = if (dashboardState.totalBalance >= 0) NeonGreen else SoftCoralRed
 
-                    StatRow(
-                        label = stringResource(id = R.string.total_balance),
-                        value = dashboardState.totalBalance,
-                        color = balanceColor
-                    )
-                    StatRow(
-                        label = stringResource(id = R.string.daily_spending),
-                        value = dashboardState.dailySpending,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+                        StatRow(
+                            label = stringResource(id = R.string.total_balance),
+                            value = dashboardState.totalBalance,
+                            color = balanceColor,
+                            currency = selectedCurrency
+                        )
+                        StatRow(
+                            label = stringResource(id = R.string.daily_spending),
+                            value = dashboardState.dailySpending,
+                            color = SoftCoralRed,
+                            currency = selectedCurrency
+                        )
+                    }
                 }
             }
         }
 
         if (!dashboardState.isLoading) {
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Category Distribution", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(12.dp))
-                    DoughnutChart(categoryTotals = dashboardState.categoryTotals)
+            item {
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Finans Grafiklerim", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        TabRow(selectedTabIndex = selectedTab) {
+                            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("Giderler") })
+                            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("Gelirler") })
+                            Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }, text = { Text("Net Durum") })
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        when (selectedTab) {
+                            0 -> {
+                                if (dashboardState.expenseCategoryTotals.isEmpty()) {
+                                    Text("Henuz veri yok")
+                                } else {
+                                    DoughnutChart(categoryTotals = dashboardState.expenseCategoryTotals)
+                                }
+                            }
+                            1 -> {
+                                if (dashboardState.incomeCategoryTotals.isEmpty()) {
+                                    Text("Henuz veri yok")
+                                } else {
+                                    DoughnutChart(categoryTotals = dashboardState.incomeCategoryTotals)
+                                }
+                            }
+                            else -> {
+                                if (dashboardState.totalIncome == 0.0 && dashboardState.totalExpense == 0.0) {
+                                    Text("Henuz veri yok")
+                                } else {
+                                    NetBarChart(
+                                        income = dashboardState.totalIncome,
+                                        expense = dashboardState.totalExpense,
+                                        currency = selectedCurrency
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // Visual expense entry
-        OutlinedButton(
-            onClick = onScanReceiptClicked,
-            modifier = Modifier.padding(top = 8.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Default.CameraAlt,
-                contentDescription = stringResource(id = R.string.scan_receipt)
-            )
-            Spacer(Modifier.width(10.dp))
-            Text(stringResource(id = R.string.scan_receipt))
+        item {
+            OutlinedButton(
+                onClick = onScanReceiptClicked,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth(),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = stringResource(id = R.string.scan_receipt)
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(stringResource(id = R.string.scan_receipt))
+            }
         }
 
-        Button(onClick = onAddExpenseClicked) { Text(stringResource(id = R.string.add)) }
+        item {
+            Button(onClick = onAddExpenseClicked, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(id = R.string.add))
+            }
+        }
     }
 }
 
@@ -141,7 +180,7 @@ private fun RowLoading() {
 }
 
 @Composable
-private fun StatRow(label: String, value: Double, color: androidx.compose.ui.graphics.Color) {
+private fun StatRow(label: String, value: Double, color: androidx.compose.ui.graphics.Color, currency: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -149,9 +188,36 @@ private fun StatRow(label: String, value: Double, color: androidx.compose.ui.gra
         Text(label, style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.width(8.dp))
         Text(
-            text = String.format("%.2f", value),
+            text = "$currency ${String.format("%.2f", value)}",
             style = MaterialTheme.typography.headlineSmall,
             color = color
+        )
+    }
+}
+
+@Composable
+private fun NetBarChart(income: Double, expense: Double, currency: String) {
+    val maxValue = maxOf(income, expense).coerceAtLeast(1.0)
+    val incomeRatio = (income / maxValue).toFloat()
+    val expenseRatio = (expense / maxValue).toFloat()
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("Gelir vs Gider", style = MaterialTheme.typography.titleSmall)
+        Text("Gelir: $currency ${String.format("%.2f", income)}", color = NeonGreen)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(incomeRatio)
+                .height(20.dp)
+                .padding(end = 8.dp)
+                .background(NeonGreen, RoundedCornerShape(8.dp))
+        )
+        Text("Gider: $currency ${String.format("%.2f", expense)}", color = SoftCoralRed)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(expenseRatio)
+                .height(20.dp)
+                .padding(end = 8.dp)
+                .background(SoftCoralRed, RoundedCornerShape(8.dp))
         )
     }
 }

@@ -50,7 +50,13 @@ fun SpendWiseNavHost(
             val vm: AddExpenseViewModel = viewModel(factory = addExpenseViewModelFactory)
             AddExpenseScreen(
                 viewModel = vm,
-                onSaved = { navController.navigate(SpendWiseRoutes.Home.route) }
+                onBack = { navController.popBackStack() },
+                onSaved = {
+                    navController.navigate(SpendWiseRoutes.Home.route) {
+                        popUpTo(SpendWiseRoutes.Home.route) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
         composable(SpendWiseRoutes.Expenses.route) {
