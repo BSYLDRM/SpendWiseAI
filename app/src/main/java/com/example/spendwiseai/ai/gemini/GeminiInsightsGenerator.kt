@@ -1,5 +1,6 @@
 package com.example.spendwiseai.ai.gemini
 
+import android.util.Log
 import com.example.spendwiseai.data.db.dao.CategoryTotal
 import java.util.Locale
 
@@ -16,45 +17,51 @@ class GeminiInsightsGenerator(
             return fallbackInsights(totalBalance, dailySpending, categoryTotals)
         }
 
-        val top = categoryTotals.take(5).joinToString(", ") { "${it.categoryName}=${String.format(Locale.US, "%.2f", it.totalAmount)}" }
+        val top = categoryTotals.take(5).joinToString(", ") {
+            "${it.categoryName}=${String.format(Locale.US, "%.0f", it.totalAmount)}TL"
+        }
+
+        // Prompt kısa ve net — giriş cümlesi yok, direkt rapor
         val prompt = """
-            Sen bir kişisel finans uzmanısın. Aşağıdaki verileri analiz et 
-            ve Türkçe detaylı bir rapor yaz.
+            Write a Turkish personal finance report.
+            NO greeting. Start directly with the first emoji section.
+            Use ONLY period as decimal separator (e.g. 90667.05 NOT 90.667,05).
+            Each section maximum 2 sentences. Be concise.
 
             VERİLER:
-            - Toplam bakiye: $totalBalance TL
-            - Bugünkü harcama: $dailySpending TL
-            - Kategori harcamaları: $top
+            Bakiye: ${String.format(Locale.US, "%.2f", totalBalance)} TL
+            Bugün harcama: ${String.format(Locale.US, "%.2f", dailySpending)} TL
+            Kategoriler: $top
 
-            RAPORU ŞÖYLE YAPI, her bölüm arasında boş satır bırak:
+            RAPOR FORMATI (her bölümü yaz, kısa ve öz):
 
             💰 GENEL DURUM
-            Bakiyeni ve genel finansal durumunu 2 cümleyle değerlendir.
+            (bakiye hakkında 2 cümle)
 
-            📊 HARCAMA ANALİZİ  
-            En çok harcadığın kategoriyi belirt, bu normalin üzerinde mi 
-            yoksa makul mü yorumunu yap. Rakamları kullan.
+            📊 HARCAMA ANALİZİ
+            (en yüksek kategori ve yüzdesi, 2 cümle)
 
-            ⚠️ DİKKAT EDİLMESİ GEREKENLER
-            Azaltılması gereken 2 harcama kalemi ve neden azaltılması 
-            gerektiğini açıkla. Somut rakam ver.
+            ⚠️ DİKKAT
+            (azaltılması gereken 2 kalem, rakam ver)
 
-            🎯 BU AY İÇİN HEDEFLER
-            3 madde halinde somut ve ölçülebilir hedef yaz.
-            Her hedef rakam içersin. Örnek: Market harcamasını 
-            500 TL altında tut.
+            🎯 HEDEFLER
+            1. (somut rakamla hedef)
+            2. (somut rakamla hedef)
+            3. (somut rakamla hedef)
 
-            💡 TASARRUF ÖNERİLERİ
-            Bu kişinin harcama profiline özel 3 pratik tasarruf önerisi.
-            Genel değil, verilere dayalı kişisel öneriler olsun.
-
-            Toplam 15-20 cümle olsun. Samimi, motive edici bir dil kullan.
+            💡 ÖNERİLER
+            1. (kişisel öneri)
+            2. (kişisel öneri)
+            3. (kişisel öneri)
         """.trimIndent()
 
         return try {
             val client = GeminiRestClient(apiKey = apiKey)
-            client.generateContentText(prompt).trim()
-        } catch (_: Throwable) {
+            val result = client.generateContentText(prompt)
+            Log.d("InsightsDebug", "Gemini cevabı geldi: $result")
+            result.trim()
+        } catch (e: Throwable) {
+            Log.e("InsightsDebug", "HATA: ${e.message}")
             fallbackInsights(totalBalance, dailySpending, categoryTotals)
         }
     }
@@ -65,29 +72,51 @@ class GeminiInsightsGenerator(
         categoryTotals: List<CategoryTotal>
     ): String {
         val top = categoryTotals.firstOrNull()
-        val second = categoryTotals.getOrNull(1)?.categoryName ?: "Yok"
-        val status = if (totalBalance >= 0) "denge pozitif" else "denge negatif"
-        return """
+        val totalExpense = categoryTotals.sumOf { it.totalAmount }
+        val topShare = if (totalExpense > 0) (top?.totalAmount ?: 0.0) / totalExpense else 0.0
+
+        return if (top != null && topShare >= 0.35) {
+            """
             💰 GENEL DURUM
-            Toplam bakiyen ${"%.2f".format(Locale.US, totalBalance)} TL ve şu an $status. Bu tabloyu düzenli takip etmen finansal kontrolü güçlendirir.
+            Bakiyeniz ${String.format(Locale.US, "%.2f", totalBalance)} TL. Harcamalarınız gelirinizi aşıyor.
 
             📊 HARCAMA ANALİZİ
-            En çok harcama yaptığın kategori ${top?.categoryName ?: "Other"} görünüyor. İkinci sırada $second var.
+            En yüksek harcama ${top.categoryName} kategorisinde: ${String.format(Locale.US, "%.2f", top.totalAmount)} TL (%${(topShare * 100).toInt()}).
 
-            ⚠️ DİKKAT EDİLMESİ GEREKENLER
-            1) En yüksek kategori harcamasında %10 azaltım dene.
-            2) Günlük harcamayı ${"%.2f".format(Locale.US, dailySpending)} TL seviyesinin altında tutmaya çalış.
+            ⚠️ DİKKAT
+            ${top.categoryName} harcamasını %20 azaltın. Bugün ${String.format(Locale.US, "%.2f", dailySpending)} TL harcadınız.
 
-            🎯 BU AY İÇİN HEDEFLER
-            1. Haftalık market harcamasını 500 TL altında tut.
-            2. Aylık eğlence harcamasını 1000 TL altında sınırla.
-            3. Her ay en az 1500 TL birikim ayır.
+            🎯 HEDEFLER
+            1. ${top.categoryName} için aylık limit belirleyin.
+            2. Günlük harcamayı takip edin.
+            3. Aylık tasarruf hedefi koyun.
 
-            💡 TASARRUF ÖNERİLERİ
-            1. En yüksek iki kategoride toplam %15 kısma hedefi koy.
-            2. Abonelik ve tekrar eden küçük ödemeleri gözden geçir.
-            3. Günlük harcama limitini yazılı takip et.
-        """.trimIndent()
+            💡 ÖNERİLER
+            1. Gereksiz alışverişlerden kaçının.
+            2. Haftalık bütçe planlayın.
+            3. Tasarruf hesabı açın.
+            """.trimIndent()
+        } else {
+            """
+            💰 GENEL DURUM
+            Bakiyeniz ${String.format(Locale.US, "%.2f", totalBalance)} TL.
+
+            📊 HARCAMA ANALİZİ
+            Harcamalarınız dengeli görünüyor. Bugün ${String.format(Locale.US, "%.2f", dailySpending)} TL harcadınız.
+
+            ⚠️ DİKKAT
+            Harcama kategorilerinizi düzenli kontrol edin.
+
+            🎯 HEDEFLER
+            1. Aylık bütçe oluşturun.
+            2. Tasarruf oranını artırın.
+            3. Gereksiz abonelikleri iptal edin.
+
+            💡 ÖNERİLER
+            1. Haftalık harcama özeti çıkarın.
+            2. En yüksek kalemi %10 azaltın.
+            3. Acil durum fonu oluşturun.
+            """.trimIndent()
+        }
     }
 }
-

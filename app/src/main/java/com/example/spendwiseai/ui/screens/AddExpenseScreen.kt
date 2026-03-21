@@ -21,9 +21,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,16 +59,31 @@ fun AddExpenseScreen(
     onBack: () -> Unit,
     onSaved: () -> Unit
 ) {
-    val state = viewModel.uiState.collectAsState().value
-    val selectedType = viewModel.selectedType.collectAsState().value
+    val state by viewModel.uiState.collectAsState()
+    val selectedType by viewModel.selectedType.collectAsState()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val selectedCurrency = LocaleManager.getCurrency(context)
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    var showSuccess by remember { mutableStateOf(false) }
     val preview = state.preview
     val accent = if (selectedType == TransactionType.INCOME) NeonGreen else SoftCoralRed
+    val screenTitle = if (selectedType == TransactionType.INCOME) "Gelir Ekle" else "Gider Ekle"
+
+    // Tipe göre placeholder metni
+    val placeholderText = if (selectedType == TransactionType.INCOME) {
+        "Ne kadar kazandın? Örnek:\n" +
+                "• Maaş 15000 TL\n" +
+                "• Freelance proje 3500 TL\n" +
+                "• Kira iadesi 800 TL\n" +
+                "• Yemek parası 500 TL geldi"
+    } else {
+        "Ne harcadın? Örnek:\n" +
+                "• 250 TL market alışverişi\n" +
+                "• Kahve ve sandviç 85 TL\n" +
+                "• Benzin 400 TL\n" +
+                "• Netflix aboneliği 120 TL"
+    }
 
     LazyColumn(
         state = listState,
@@ -80,6 +96,7 @@ fun AddExpenseScreen(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        // Başlık + geri
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -88,13 +105,11 @@ fun AddExpenseScreen(
                 IconButton(onClick = onBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
                 }
-                Text(
-                    text = "Harcama Ekle",
-                    style = MaterialTheme.typography.headlineMedium
-                )
+                Text(text = screenTitle, style = MaterialTheme.typography.headlineMedium)
             }
         }
 
+        // Gider / Gelir toggle
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -105,7 +120,7 @@ fun AddExpenseScreen(
                         onClick = { viewModel.onTypeChanged(TransactionType.EXPENSE) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = SoftCoralRed)
+                        colors = ButtonDefaults.buttonColors(containerColor = SoftCoralRed)
                     ) { Text("💸 Gider") }
                 } else {
                     OutlinedButton(
@@ -114,12 +129,13 @@ fun AddExpenseScreen(
                         shape = RoundedCornerShape(12.dp)
                     ) { Text("💸 Gider") }
                 }
+
                 if (selectedType == TransactionType.INCOME) {
                     Button(
                         onClick = { viewModel.onTypeChanged(TransactionType.INCOME) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = NeonGreen)
+                        colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
                     ) { Text("💰 Gelir") }
                 } else {
                     OutlinedButton(
@@ -131,25 +147,19 @@ fun AddExpenseScreen(
             }
         }
 
+        // Metin girişi — placeholder tipe göre değişir
         item {
             OutlinedTextField(
                 value = state.inputText,
                 onValueChange = viewModel::onInputChanged,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(
-                        "Ne harcadin veya ne kazandin? Ornek:\n" +
-                            "• 250 TL market alisverisi\n" +
-                            "• Kahve ve tavuk aldim 85 TL\n" +
-                            "• Maas 15000 TL geldi\n" +
-                            "• Bilgisayar icin kulaklik 450 TL"
-                    )
-                },
-                minLines = 7,
-                maxLines = 10
+                placeholder = { Text(placeholderText) },
+                minLines = 5,
+                maxLines = 8
             )
         }
 
+        // Analiz Et butonu
         item {
             Button(
                 onClick = viewModel::submit,
@@ -162,17 +172,19 @@ fun AddExpenseScreen(
                         strokeWidth = 2.dp
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("Isleniyor...")
+                    Text("İşleniyor...")
                 } else {
-                    Text("AI ile Analiz Et")
+                    Text("🤖 AI ile Analiz Et")
                 }
             }
         }
 
+        // Hata
         state.errorMessage?.let { error ->
             item { Text(text = error, color = MaterialTheme.colorScheme.error) }
         }
 
+        // Preview kartı
         preview?.let { parsed ->
             item {
                 AnimatedVisibility(
@@ -189,29 +201,38 @@ fun AddExpenseScreen(
             }
         }
 
-        if (preview != null && state.lastTransactionId != null) {
+        // Kaydet butonu — preview var, henüz kaydedilmemiş
+        if (preview != null && state.lastTransactionId == null) {
+            item {
+                Button(
+                    onClick = { viewModel.confirmSave() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = accent)
+                ) { Text("✅ Kaydet") }
+            }
+        }
+
+        // Başarı + Ana sayfaya dön
+        if (state.lastTransactionId != null) {
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGreen)
+                    Text("Başarıyla kaydedildi!", color = NeonGreen)
+                }
+            }
             item {
                 Button(
                     onClick = {
-                        showSuccess = true
                         coroutineScope.launch {
-                            delay(900)
+                            delay(300)
                             onSaved()
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
-                ) { Text("Kaydet") }
-            }
-            item {
-                AnimatedVisibility(visible = showSuccess) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGreen)
-                        Text("Basariyla kaydedildi")
-                    }
-                }
+                ) { Text("Ana sayfaya dön") }
             }
         }
     }
@@ -223,53 +244,74 @@ private fun PreviewCard(
     accent: androidx.compose.ui.graphics.Color,
     displayCurrency: String
 ) {
-    val tint = accent
     val isIncome = parsed.type == TransactionType.INCOME
-    val typeLabel = if (isIncome) "\uD83D\uDCB0 Gelir" else "\uD83D\uDCB8 Gider"
+    val typeLabel = if (isIncome) "💰 Gelir" else "💸 Gider"
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = tint.copy(alpha = 0.1f))
+        colors = CardDefaults.cardColors(containerColor = accent.copy(alpha = 0.1f))
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Cozumleme Onizlemesi", style = MaterialTheme.typography.titleMedium, color = tint)
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(if (isIncome) "\uD83D\uDCB0" else "\uD83D\uDCB8", style = MaterialTheme.typography.headlineSmall)
-                Spacer(Modifier.width(8.dp))
-                Text(typeLabel, color = tint, style = MaterialTheme.typography.titleMedium)
-            }
-
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text("🤖 AI Analiz Sonucu", style = MaterialTheme.typography.titleMedium, color = accent)
+            Text(typeLabel, color = accent, style = MaterialTheme.typography.titleMedium)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(categoryEmoji(parsed.category))
                 Spacer(Modifier.width(8.dp))
-                Text(parsed.category)
+                Text(categoryDisplayName(parsed.category))
             }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "${parsed.amount} $displayCurrency",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = tint
-                )
-            }
+            Text(
+                "${parsed.amount} $displayCurrency",
+                style = MaterialTheme.typography.headlineMedium,
+                color = accent
+            )
+            Text(
+                "Doğru mu? Kaydet butonuna bas.",
+                style = MaterialTheme.typography.bodySmall,
+                color = androidx.compose.ui.graphics.Color.Gray
+            )
         }
     }
 }
 
-private fun categoryEmoji(category: String): String {
-    return when (category) {
-        "Groceries" -> "\uD83D\uDED2"
-        "Food & Drink" -> "\uD83C\uDF55"
-        "Transportation" -> "\uD83D\uDE97"
-        "Technology" -> "\uD83D\uDCBB"
-        "Entertainment" -> "\uD83C\uDFAC"
-        "Shopping" -> "\uD83D\uDEDD"
-        "Health" -> "\uD83D\uDC8A"
-        "Bills & Utilities" -> "\uD83D\uDCF1"
-        "Education" -> "\uD83D\uDCDA"
-        "Salary" -> "\uD83D\uDCBC"
-        else -> "\uD83D\uDCE6"
-    }
+private fun categoryEmoji(category: String): String = when (category) {
+    "Groceries" -> "🛒"
+    "Food & Drink" -> "🍕"
+    "Transportation" -> "🚗"
+    "Technology" -> "💻"
+    "Entertainment" -> "🎬"
+    "Shopping" -> "🛍️"
+    "Health" -> "💊"
+    "Bills & Utilities" -> "📱"
+    "Education" -> "📚"
+    "Salary" -> "💼"
+    "Freelance" -> "🖥️"
+    "Refund" -> "↩️"
+    "Meal Allowance" -> "🍱"
+    "Investment" -> "📈"
+    "Gift" -> "🎁"
+    "Other Income" -> "💵"
+    else -> "📦"
 }
 
+private fun categoryDisplayName(category: String): String = when (category) {
+    "Groceries" -> "Market"
+    "Food & Drink" -> "Yemek & İçecek"
+    "Transportation" -> "Ulaşım"
+    "Technology" -> "Teknoloji"
+    "Entertainment" -> "Eğlence"
+    "Shopping" -> "Alışveriş"
+    "Health" -> "Sağlık"
+    "Bills & Utilities" -> "Faturalar"
+    "Education" -> "Eğitim"
+    "Salary" -> "Maaş"
+    "Freelance" -> "Freelance"
+    "Refund" -> "İade"
+    "Meal Allowance" -> "Yemek Parası"
+    "Investment" -> "Yatırım"
+    "Gift" -> "Hediye / Bağış"
+    "Other Income" -> "Diğer Gelir"
+    else -> category
+}

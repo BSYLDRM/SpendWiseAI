@@ -1,52 +1,53 @@
 package com.example.spendwiseai.ui
 
 import android.app.Activity
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.rememberNavController
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
-import com.example.spendwiseai.R
-import com.example.spendwiseai.core.AppContainer
-import com.example.spendwiseai.ui.navigation.SpendWiseNavHost
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
-import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.spendwiseai.R
+import com.example.spendwiseai.core.AppContainer
 import com.example.spendwiseai.core.LocaleManager
+import com.example.spendwiseai.ui.navigation.SpendWiseNavHost
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +70,7 @@ fun SpendWiseApp() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(72.dp)
+                    .height(64.dp)
                     .background(MaterialTheme.colorScheme.surface),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
@@ -78,31 +79,31 @@ fun SpendWiseApp() {
                     selected = currentRoute == Routes.Home,
                     onClick = { navController.navigateToBottomTab(Routes.Home) },
                     icon = Icons.Default.Home,
-                    label = "Ana Sayfa"
+                    label = "Anasayfa"
                 )
                 BottomNavItem(
                     selected = currentRoute == Routes.Expenses,
                     onClick = { navController.navigateToBottomTab(Routes.Expenses) },
                     icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                    label = stringResource(id = R.string.expense)
+                    label = "Gider"
                 )
                 BottomNavItem(
                     selected = currentRoute == Routes.Incomes,
                     onClick = { navController.navigateToBottomTab(Routes.Incomes) },
                     icon = Icons.Default.AccountBalanceWallet,
-                    label = stringResource(id = R.string.income)
+                    label = "Gelir"
                 )
                 BottomNavItem(
                     selected = currentRoute == Routes.Insights,
                     onClick = { navController.navigateToBottomTab(Routes.Insights) },
                     icon = Icons.Default.Analytics,
-                    label = "Ipuclari"
+                    label = "AI Koç"
                 )
                 BottomNavItem(
                     selected = currentRoute == Routes.Budget,
                     onClick = { navController.navigateToBottomTab(Routes.Budget) },
                     icon = Icons.Default.Flag,
-                    label = "Butce"
+                    label = "Bütçe"
                 )
                 BottomNavItem(
                     selected = false,
@@ -127,10 +128,16 @@ fun SpendWiseApp() {
             containerColor = Color.White,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Dil", style = MaterialTheme.typography.titleMedium, color = Color.Black)
-                LanguageOptionRow(
-                    label = "TR 🇹🇷",
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("⚙️ Ayarlar", style = MaterialTheme.typography.titleLarge, color = Color.Black)
+                Spacer(Modifier.height(8.dp))
+
+                Text("🌐 Dil", style = MaterialTheme.typography.titleMedium, color = Color.Black)
+                SettingsOptionRow(
+                    label = "Türkçe 🇹🇷",
                     selected = selectedLanguage == "tr",
                     onSelect = {
                         selectedLanguage = "tr"
@@ -139,8 +146,8 @@ fun SpendWiseApp() {
                     }
                 )
                 HorizontalDivider()
-                LanguageOptionRow(
-                    label = "EN 🇬🇧",
+                SettingsOptionRow(
+                    label = "English 🇬🇧",
                     selected = selectedLanguage == "en",
                     onSelect = {
                         selectedLanguage = "en"
@@ -149,35 +156,20 @@ fun SpendWiseApp() {
                     }
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
-                Text("Para Birimi", style = MaterialTheme.typography.titleMedium, color = Color.Black)
-                CurrencyOptionRow(
-                    label = "TL",
-                    selected = selectedCurrency == "TL",
-                    onSelect = {
-                        selectedCurrency = "TL"
-                        LocaleManager.setCurrency(context, "TL")
-                    }
-                )
-                HorizontalDivider()
-                CurrencyOptionRow(
-                    label = "USD",
-                    selected = selectedCurrency == "USD",
-                    onSelect = {
-                        selectedCurrency = "USD"
-                        LocaleManager.setCurrency(context, "USD")
-                    }
-                )
-                HorizontalDivider()
-                CurrencyOptionRow(
-                    label = "EUR",
-                    selected = selectedCurrency == "EUR",
-                    onSelect = {
-                        selectedCurrency = "EUR"
-                        LocaleManager.setCurrency(context, "EUR")
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
+                Text("💱 Para Birimi", style = MaterialTheme.typography.titleMedium, color = Color.Black)
+                listOf("TL", "USD", "EUR").forEach { currency ->
+                    SettingsOptionRow(
+                        label = currency,
+                        selected = selectedCurrency == currency,
+                        onSelect = {
+                            selectedCurrency = currency
+                            LocaleManager.setCurrency(context, currency)
+                        }
+                    )
+                    if (currency != "EUR") HorizontalDivider()
+                }
+                Spacer(Modifier.height(24.dp))
             }
         }
     }
@@ -190,22 +182,40 @@ private fun BottomNavItem(
     icon: ImageVector,
     label: String
 ) {
-    androidx.compose.foundation.layout.Column(
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .clickable(onClick = onClick)
-            .padding(horizontal = 6.dp, vertical = 10.dp)
+            .padding(horizontal = 4.dp, vertical = 8.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            tint = if (selected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            fontSize = 9.sp,
+            color = if (selected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1
         )
+    }
+}
+
+@Composable
+private fun SettingsOptionRow(label: String, selected: Boolean, onSelect: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onSelect)
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, color = Color.Black)
+        RadioButton(selected = selected, onClick = onSelect)
     }
 }
 
@@ -226,34 +236,3 @@ private fun androidx.navigation.NavHostController.navigateToBottomTab(route: Str
         restoreState = true
     }
 }
-
-@Composable
-private fun LanguageOptionRow(label: String, selected: Boolean, onSelect: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onSelect)
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(label, color = Color.Black)
-        RadioButton(selected = selected, onClick = onSelect)
-    }
-}
-
-@Composable
-private fun CurrencyOptionRow(label: String, selected: Boolean, onSelect: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onSelect)
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(label, color = Color.Black)
-        RadioButton(selected = selected, onClick = onSelect)
-    }
-}
-

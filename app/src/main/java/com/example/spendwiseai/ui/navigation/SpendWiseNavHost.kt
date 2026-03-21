@@ -26,10 +26,11 @@ fun SpendWiseNavHost(
     appContainer: AppContainer
 ) {
     val transactionRepository = appContainer.provideTransactionRepository()
+
+    // transactionRepository kaldırıldı — AddExpenseViewModel artık buna ihtiyaç duymuyor
     val addExpenseViewModelFactory = remember(appContainer) {
         SpendWiseViewModelFactory(
-            addExpenseUseCase = appContainer.getAddExpenseUseCase(),
-            transactionRepository = transactionRepository
+            addExpenseUseCase = appContainer.getAddExpenseUseCase()
         )
     }
 
@@ -41,12 +42,14 @@ fun SpendWiseNavHost(
             val dashboardFactory = remember(appContainer) {
                 DashboardViewModelFactory(transactionRepository)
             }
-            val dashboardVm: com.example.spendwiseai.presentation.dashboard.DashboardViewModel = viewModel(factory = dashboardFactory)
+            val dashboardVm: com.example.spendwiseai.presentation.dashboard.DashboardViewModel =
+                viewModel(factory = dashboardFactory)
             HomeScreen(
                 onAddExpenseClicked = { navController.navigate(SpendWiseRoutes.Add.route) },
                 dashboardViewModel = dashboardVm
             )
         }
+
         composable(SpendWiseRoutes.Add.route) {
             val vm: AddExpenseViewModel = viewModel(factory = addExpenseViewModelFactory)
             AddExpenseScreen(
@@ -60,6 +63,7 @@ fun SpendWiseNavHost(
                 }
             )
         }
+
         composable(SpendWiseRoutes.Expenses.route) {
             val factory = remember {
                 TransactionsListViewModelFactory(
@@ -67,13 +71,15 @@ fun SpendWiseNavHost(
                     transactionRepository = transactionRepository
                 )
             }
-            val vm: com.example.spendwiseai.presentation.transactions.TransactionsListViewModel = viewModel(factory = factory)
+            val vm: com.example.spendwiseai.presentation.transactions.TransactionsListViewModel =
+                viewModel(factory = factory)
             TransactionsListScreen(
                 transactionType = com.example.spendwiseai.domain.model.TransactionType.EXPENSE,
                 viewModel = vm,
                 title = stringResource(id = com.example.spendwiseai.R.string.expense)
             )
         }
+
         composable(SpendWiseRoutes.Incomes.route) {
             val factory = remember {
                 TransactionsListViewModelFactory(
@@ -81,13 +87,15 @@ fun SpendWiseNavHost(
                     transactionRepository = transactionRepository
                 )
             }
-            val vm: com.example.spendwiseai.presentation.transactions.TransactionsListViewModel = viewModel(factory = factory)
+            val vm: com.example.spendwiseai.presentation.transactions.TransactionsListViewModel =
+                viewModel(factory = factory)
             TransactionsListScreen(
                 transactionType = com.example.spendwiseai.domain.model.TransactionType.INCOME,
                 viewModel = vm,
                 title = stringResource(id = com.example.spendwiseai.R.string.income)
             )
         }
+
         composable(SpendWiseRoutes.Insights.route) {
             val insightsFactory = remember(appContainer) {
                 InsightsViewModelFactory(
@@ -103,6 +111,7 @@ fun SpendWiseNavHost(
                 onBackToHome = { navController.navigate(SpendWiseRoutes.Home.route) }
             )
         }
+
         composable(SpendWiseRoutes.Budget.route) {
             val context = androidx.compose.ui.platform.LocalContext.current
             val factory = remember(appContainer) {
@@ -111,10 +120,10 @@ fun SpendWiseNavHost(
                     transactionRepository = transactionRepository
                 )
             }
-            val vm: com.example.spendwiseai.presentation.budget.BudgetViewModel = viewModel(factory = factory)
+            val vm: com.example.spendwiseai.presentation.budget.BudgetViewModel =
+                viewModel(factory = factory)
             BudgetScreen(viewModel = vm)
         }
-
     }
 }
 
@@ -128,4 +137,3 @@ private object SpendWiseRoutes {
 
     data class Route(val route: String)
 }
-

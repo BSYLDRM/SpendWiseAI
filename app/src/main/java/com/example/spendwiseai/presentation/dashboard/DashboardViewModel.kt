@@ -9,24 +9,29 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import java.time.ZoneId
-import java.time.ZonedDateTime
 
 class DashboardViewModel(
     private val transactionRepository: TransactionRepository
 ) : ViewModel() {
-    private val now = Instant.now()
-    private val zone = ZoneId.systemDefault()
-    private val nowZoned: ZonedDateTime = now.atZone(zone)
-    private val startOfToday = nowZoned.toLocalDate().atStartOfDay(zone).toInstant().toEpochMilli()
-    private val endOfToday = startOfToday + 24L * 60L * 60L * 1000L
-    private val startOfRange = nowZoned.minusDays(6).toLocalDate().atStartOfDay(zone).toInstant().toEpochMilli()
 
     val uiState = combine(
         transactionRepository.observeTotalAmountForType(TransactionType.INCOME),
         transactionRepository.observeTotalAmountForType(TransactionType.EXPENSE),
-        transactionRepository.observeAmountBetween(TransactionType.EXPENSE, startOfToday, endOfToday),
-        transactionRepository.observeCategoryTotalsBetween(TransactionType.EXPENSE, startOfRange, endOfToday),
-        transactionRepository.observeCategoryTotalsBetween(TransactionType.INCOME, startOfRange, endOfToday)
+        transactionRepository.observeAmountBetween(
+            TransactionType.EXPENSE,
+            getTodayStart(),
+            getTodayEnd()
+        ),
+        transactionRepository.observeCategoryTotalsBetween(
+            TransactionType.EXPENSE,
+            getRangeStart(),
+            getTodayEnd()
+        ),
+        transactionRepository.observeCategoryTotalsBetween(
+            TransactionType.INCOME,
+            getRangeStart(),
+            getTodayEnd()
+        )
     ) { totalIncome, totalExpense, dailySpending, expenseCategoryTotals, incomeCategoryTotals ->
         DashboardUiState(
             isLoading = false,
@@ -42,5 +47,19 @@ class DashboardViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = DashboardUiState(isLoading = true)
     )
-}
 
+    // Fix 13: her çağrıda anlık zaman hesaplanır, gece yarısı sorunu olmaz
+    private fun getTodayStart(): Long {
+        val zone = ZoneId.systemDefault()
+        return Instant.now().atZone(zone).toLocalDate()
+            .atStartOfDay(zone).toInstant().toEpochMilli()
+    }
+
+    private fun getTodayEnd(): Long = getTodayStart() + 24L * 60L * 60L * 1000L
+
+    private fun getRangeStart(): Long {
+        val zone = ZoneId.systemDefault()
+        return Instant.now().atZone(zone).minusDays(6).toLocalDate()
+            .atStartOfDay(zone).toInstant().toEpochMilli()
+    }
+}

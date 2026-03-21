@@ -29,18 +29,16 @@ class InsightsViewModel(
     val uiState = combine(
         insightsRepository.observeAll(),
         _isGenerating
-    ) { insights, generating ->
+    ) { insights, isGenerating ->
         InsightsUiState(
-            isLoading = generating || insights.isEmpty(),
-            isGenerating = generating,
+            isLoading = false,
+            isGenerating = isGenerating,
             insights = insights
         )
-    }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InsightsUiState())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InsightsUiState())
 
-    init {
-        refreshInsight()
-    }
+    // init kasıtlı boş — kullanıcı butona basınca üretsin
+    init {}
 
     fun refreshInsight() {
         viewModelScope.launch {
@@ -57,15 +55,15 @@ class InsightsViewModel(
                     .toLocalDate().atStartOfDay(zone)
                     .toInstant().toEpochMilli()
 
-                val totalIncome = transactionRepository
-                    .getTotalAmountForType(TransactionType.INCOME)
-                val totalExpense = transactionRepository
-                    .getTotalAmountForType(TransactionType.EXPENSE)
+                val totalIncome = transactionRepository.getTotalAmountForType(TransactionType.INCOME)
+                val totalExpense = transactionRepository.getTotalAmountForType(TransactionType.EXPENSE)
                 val totalBalance = totalIncome - totalExpense
-                val dailySpending = transactionRepository
-                    .getAmountBetween(TransactionType.EXPENSE, startOfToday, endOfToday)
-                val categoryTotals = transactionRepository
-                    .getCategoryTotalsBetween(TransactionType.EXPENSE, startOfRange, endOfToday)
+                val dailySpending = transactionRepository.getAmountBetween(
+                    TransactionType.EXPENSE, startOfToday, endOfToday
+                )
+                val categoryTotals = transactionRepository.getCategoryTotalsBetween(
+                    TransactionType.EXPENSE, startOfRange, endOfToday
+                )
 
                 val content = generator.generateInsights(
                     totalBalance = totalBalance,
@@ -81,11 +79,10 @@ class InsightsViewModel(
                     )
                 )
             } catch (e: Exception) {
-                Log.e("InsightsVM", "Rapor üretilemedi: ${e.message}")
+                Log.e("InsightsDebug", "ViewModel HATA: ${e.message}")
             } finally {
                 _isGenerating.value = false
             }
         }
     }
 }
-

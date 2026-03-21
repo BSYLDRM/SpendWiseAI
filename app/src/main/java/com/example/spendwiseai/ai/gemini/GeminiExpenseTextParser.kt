@@ -11,74 +11,61 @@ class GeminiExpenseTextParser(
 ) : ExpenseTextParser {
 
     override suspend fun parseExpense(text: String): ParsedTransaction {
-        if (apiKey.isBlank()) {
-            // No API key configured yet; use a local heuristic so UX still works.
-            return fallback.parseExpense(text)
-        }
+        if (apiKey.isBlank()) return fallback.parseExpense(text)
 
         val prompt = buildPrompt(text)
         val client = GeminiRestClient(apiKey = apiKey)
 
         return try {
             val raw = client.generateContentText(prompt)
-            parseJsonFromModel(raw)?.let { parsed ->
-                if (parsed.amount > 0 && parsed.currency.isNotBlank() && parsed.category.isNotBlank()) {
-                    parsed
-                } else {
-                    fallback.parseExpense(text)
-                }
+            parseJsonFromModel(raw)?.takeIf {
+                it.amount > 0 && it.currency.isNotBlank() && it.category.isNotBlank()
             } ?: fallback.parseExpense(text)
         } catch (_: Throwable) {
-            // Parsing can fail (network, quota, or model output format). Fall back gracefully.
             fallback.parseExpense(text)
         }
     }
 
     private fun buildPrompt(userText: String): String {
         return """
-            Sen bir finansal analiz asistanısın. Kullanıcının yazdığı metni 
-            analiz et ve aşağıdaki JSON formatında döndür.
+            Sen bir finansal analiz asistanısın. Kullanıcının yazdığı metni analiz et.
+            SADECE aşağıdaki JSON'ı döndür, başka hiçbir şey yazma:
+            {"amount": 250.0, "currency": "TL", "category": "Groceries", "type": "EXPENSE"}
 
-            Kullanıcı metni: "$userText"
-
-            GELİR Mİ GİDER Mİ:
-            - "geldi, aldım maaş, kazandım, ödeme aldım" → INCOME
+            GELİR mi GİDER mi:
+            - maaş, ikramiye, prim, kazandım, geldi, aldım (para), iade, freelance, yemek parası → INCOME
             - Geri kalan her şey → EXPENSE
 
-            KATEGORİLER (çok dikkatli seç):
-            - Groceries → market, migros, bim, a101, ekmek, süt, yumurta, 
-              sebze, meyve, manav, alışveriş
-            - Food & Drink → kahve, çay, restoran, cafe, yemek, döner, 
-              burger, pizza, starbucks, tavuk, et, balık, lokanta
-            - Transportation → benzin, akaryakıt, otobüs, metro, taksi, 
-              uber, dolmuş, uçak bileti, araç
-            - Technology → bilgisayar, telefon, tablet, kulaklık, 
-              elektronik, yazılım, uygulama, oyun, steam, teknoloji
-            - Shopping → kıyafet, ayakkabı, çanta, zara, lcw, hm, 
-              mağaza, avm, online alışveriş
-            - Bills & Utilities → elektrik, su, doğalgaz, internet, 
-              fatura, aidat, kira
+            GİDER KATEGORİLERİ:
+            - Groceries → market, migros, bim, a101, şok, ekmek, süt, yumurta, sebze, meyve, manav
+            - Food & Drink → kahve, çay, restoran, cafe, yemek, döner, burger, pizza, starbucks
+            - Transportation → benzin, akaryakıt, otobüs, metro, taksi, uber, dolmuş, uçak
+            - Technology → bilgisayar, telefon, tablet, kulaklık, elektronik, yazılım, oyun, steam
+            - Shopping → kıyafet, ayakkabı, çanta, zara, lcw, mağaza, avm
+            - Bills & Utilities → elektrik, su, doğalgaz, internet, fatura, aidat, kira
             - Health → eczane, ilaç, doktor, hastane, muayene, diş
-            - Education → kitap, kurs, eğitim, okul, ders, sınav
-            - Entertainment → sinema, konser, netflix, spotify, oyun, 
-              bilet, eğlence, gece
-            - Salary → maaş, ikramiye, prim, ödeme aldım
-            - Other → hiçbirine uymuyorsa
+            - Education → kitap, kurs, eğitim, okul, ders
+            - Entertainment → sinema, konser, netflix, spotify, oyun, bilet
 
-            SADECE bu JSON'ı döndür, başka hiçbir şey yazma:
-            {
-              "amount": 250.0,
-              "currency": "TL", 
-              "category": "Groceries",
-              "type": "EXPENSE"
-            }
+            GELİR KATEGORİLERİ:
+            - Salary → maaş, ikramiye, prim, aylık
+            - Freelance → freelance, proje ücreti, danışmanlık, yazılım geliri
+            - Refund → iade, geri ödeme, cashback, iptal iadesi
+            - Meal Allowance → yemek parası, yemek kartı, yemek yardımı
+            - Investment → faiz, temettü, kira geliri, yatırım getirisi
+            - Gift → hediye, bağış, harçlık
+            - Other Income → diğer gelir
+
+            Kullanıcı metni: "$userText"
         """.trimIndent()
     }
 
     private fun parseJsonFromModel(raw: String): ParsedTransaction? {
         return try {
-            val jsonText = extractJsonObject(raw) ?: return null
-            val json = JSONObject(jsonText)
+            val start = raw.indexOf('{')
+            val end = raw.lastIndexOf('}')
+            if (start == -1 || end == -1 || end <= start) return null
+            val json = JSONObject(raw.substring(start, end + 1))
 
             val amount = json.optDouble("amount", Double.NaN)
             val currency = json.optString("currency", "").trim()
@@ -89,26 +76,10 @@ class GeminiExpenseTextParser(
                 else -> return null
             }
 
-            if (amount.isNaN() || amount <= 0.0 || currency.isBlank() || category.isBlank()) {
-                return null
-            }
-
-            ParsedTransaction(
-                amount = amount,
-                currency = currency,
-                category = category,
-                type = type
-            )
+            if (amount.isNaN() || amount <= 0.0 || currency.isBlank() || category.isBlank()) null
+            else ParsedTransaction(amount, currency, category, type)
         } catch (_: Throwable) {
             null
         }
     }
-
-    private fun extractJsonObject(raw: String): String? {
-        val start = raw.indexOf('{')
-        val end = raw.lastIndexOf('}')
-        if (start == -1 || end == -1 || end <= start) return null
-        return raw.substring(start, end + 1).trim()
-    }
 }
-

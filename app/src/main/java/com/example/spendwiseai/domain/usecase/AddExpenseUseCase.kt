@@ -14,13 +14,21 @@ class AddExpenseUseCase(
     private val parser: ExpenseTextParser,
     private val transactionRepository: TransactionRepository
 ) {
-    suspend fun execute(
+    // Sadece parse eder, DB'ye yazmaz
+    suspend fun parse(
         userText: String,
-        forcedType: TransactionType? = null,
+        forcedType: TransactionType? = null
+    ): ParsedTransaction {
+        val parsed = parser.parseExpense(userText)
+        return if (forcedType != null) parsed.copy(type = forcedType) else parsed
+    }
+
+    // Kullanıcı onaylayınca çağrılır, DB'ye yazar
+    suspend fun save(
+        parsed: ParsedTransaction,
+        userText: String,
         dateMillis: Long = System.currentTimeMillis()
     ): AddExpenseResult {
-        val parsedRaw = parser.parseExpense(userText)
-        val parsed = if (forcedType != null) parsedRaw.copy(type = forcedType) else parsedRaw
         val id = transactionRepository.addTransaction(
             transaction = parsed,
             description = userText,
@@ -28,5 +36,14 @@ class AddExpenseUseCase(
         )
         return AddExpenseResult(transactionId = id, parsed = parsed)
     }
-}
 
+    // Eski kod uyumluluğu için — direkt parse + kayıt
+    suspend fun execute(
+        userText: String,
+        forcedType: TransactionType? = null,
+        dateMillis: Long = System.currentTimeMillis()
+    ): AddExpenseResult {
+        val parsed = parse(userText, forcedType)
+        return save(parsed, userText, dateMillis)
+    }
+}

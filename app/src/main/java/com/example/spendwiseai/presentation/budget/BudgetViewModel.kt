@@ -12,10 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 
@@ -33,21 +31,34 @@ class BudgetViewModel(
     private val context: Context,
     private val transactionRepository: TransactionRepository
 ) : ViewModel() {
+
     private val monthOffset = MutableStateFlow(0)
+
+    // Bütçe miktarını ayrı bir Flow olarak tutuyoruz
+    // Böylece kaydet basınca bu Flow tetiklenecek ve UI güncellenecek
+    private val budgetTrigger = MutableStateFlow(0L)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState = monthOffset
         .flatMapLatest { offset ->
             val yearMonth = YearMonth.now().plusMonths(offset.toLong())
             val monthKey = "${yearMonth.year}_${yearMonth.monthValue.toString().padStart(2, '0')}"
-            val startMillis = yearMonth.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-            val endMillis = yearMonth.plusMonths(1).atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val startMillis = yearMonth.atDay(1)
+                .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val endMillis = yearMonth.plusMonths(1).atDay(1)
+                .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
             combine(
-                transactionRepository.observeAmountBetween(TransactionType.EXPENSE, startMillis, endMillis),
-                transactionRepository.observeCategoryTotalsBetween(TransactionType.EXPENSE, startMillis, endMillis)
-            ) { spent, categories ->
+                transactionRepository.observeAmountBetween(
+                    TransactionType.EXPENSE, startMillis, endMillis
+                ),
+                transactionRepository.observeCategoryTotalsBetween(
+                    TransactionType.EXPENSE, startMillis, endMillis
+                ),
+                budgetTrigger // bütçe kaydedilince bu değişir ve combine yeniden çalışır
+            ) { spent, categories, _ ->
                 val budget = BudgetManager.getBudget(context, monthKey)
-                val percent = if (budget > 0.0) (spent / budget) * 100 else 0.0
+                val percent = if (budget > 0.0) (spent / budget) * 100.0 else 0.0
                 BudgetUiState(
                     monthLabel = monthLabelTr(yearMonth),
                     monthKey = monthKey,
@@ -59,7 +70,11 @@ class BudgetViewModel(
                 )
             }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), BudgetUiState())
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            BudgetUiState()
+        )
 
     fun goPrevMonth() = monthOffset.update { it - 1 }
     fun goNextMonth() = monthOffset.update { it + 1 }
@@ -67,13 +82,14 @@ class BudgetViewModel(
     fun saveBudget(amount: Double) {
         val current = uiState.value
         BudgetManager.saveBudget(context, current.monthKey, amount)
-        monthOffset.update { it } // trigger re-read
+        // budgetTrigger'ı değiştirince combine yeniden çalışır ve UI güncellenir
+        budgetTrigger.value = System.currentTimeMillis()
     }
 
     private fun monthLabelTr(yearMonth: YearMonth): String {
         val monthNames = listOf(
-            "Ocak", "Subat", "Mart", "Nisan", "Mayis", "Haziran",
-            "Temmuz", "Agustos", "Eylul", "Ekim", "Kasim", "Aralik"
+            "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+            "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
         )
         return "${monthNames[yearMonth.monthValue - 1]} ${yearMonth.year}"
     }
