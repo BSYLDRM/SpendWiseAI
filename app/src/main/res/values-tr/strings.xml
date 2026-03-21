@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Akıllı Harca ve Kazan</string>
+
+    <!-- Core labels (TR) -->
+    <string name="total_balance">Toplam Bakiye</string>
+    <string name="daily_spending">Günlük Harcama</string>
+    <string name="scan_receipt">Fiş Tara</string>
+    <string name="income">Gelir</string>
+    <string name="expense">Gider</string>
+    <string name="add">Ekle</string>
+    <string name="delete">Sil</string>
+
+    <!-- Receipt scanning -->
+    <string name="analyzing_receipt">Fiş analiz ediliyor…</string>
+    <string name="confirm_and_save">Onayla ve Kaydet</string>
+    <string name="take_receipt_photo">Fiş fotoğrafı çek</string>
+    <string name="camera">Kamera</string>
+    <string name="receipt_preview">Fiş önizleme</string>
+    <string name="ai_parsed_preview">AI Ayrıştırılmış Önizleme</string>
+</resources>
