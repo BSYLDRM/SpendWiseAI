@@ -30,13 +30,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.spendwiseai.R
 import com.example.spendwiseai.presentation.insights.InsightsViewModel
 import com.example.spendwiseai.ui.theme.AppBackground
-import com.example.spendwiseai.ui.theme.NeonGreen
-import com.example.spendwiseai.ui.theme.SoftCoralRed
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -51,11 +51,8 @@ fun InsightsScreen(
     val focusManager = LocalFocusManager.current
     val latest = state.insights.firstOrNull()
 
-    // Yeni rapor gelince en üste scroll
     LaunchedEffect(latest?.createdAtMillis) {
-        if (state.insights.isNotEmpty()) {
-            listState.animateScrollToItem(0)
-        }
+        if (state.insights.isNotEmpty()) listState.animateScrollToItem(0)
     }
 
     Scaffold(
@@ -63,122 +60,73 @@ fun InsightsScreen(
             Button(
                 onClick = viewModel::refreshInsight,
                 enabled = !state.isGenerating,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .height(52.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp).height(52.dp)
             ) {
                 if (state.isGenerating) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
-                        color = Color.White
-                    )
-                    Text("  AI analiz ediyor...", color = Color.White)
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)
+                    Text(stringResource(R.string.ai_analyzing), color = Color.White)
                 } else {
-                    Text("🔄 Yeni Rapor Üret")
+                    Text(stringResource(R.string.generate_report_btn))
                 }
             }
         }
     ) { padding ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = { focusManager.clearFocus() })
-                },
+            modifier = Modifier.fillMaxSize().padding(padding).pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) },
             state = listState,
             contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Üst başlık kartı
             item {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = AppBackground),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                Card(colors = CardDefaults.cardColors(containerColor = AppBackground), modifier = Modifier.fillMaxWidth()) {
                     Box(
                         modifier = Modifier
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    listOf(AppBackground, AppBackground.copy(alpha = 0.85f))
-                                )
-                            )
+                            .background(Brush.verticalGradient(listOf(AppBackground, AppBackground.copy(alpha = 0.85f))))
                             .padding(20.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                "AI Finans Koçun 🤖",
-                                color = Color.White,
-                                style = MaterialTheme.typography.titleLarge
-                            )
+                            Text(stringResource(R.string.ai_coach_title), color = Color.White, style = MaterialTheme.typography.titleLarge)
                             if (latest != null) {
                                 Text(
-                                    text = "Son analiz: ${formatReportDate(latest.createdAtMillis)}",
+                                    text = stringResource(R.string.last_analysis, formatReportDate(latest.createdAtMillis)),
                                     color = Color.LightGray,
                                     style = MaterialTheme.typography.labelSmall
                                 )
                             } else {
-                                Text(
-                                    text = "Henüz analiz yapılmadı",
-                                    color = Color.LightGray,
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+                                Text(stringResource(R.string.no_analysis_yet), color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
                 }
             }
 
-            // Rapor yoksa boş durum
             if (latest == null && !state.isGenerating) {
                 item {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 48.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text("🤖", fontSize = 48.sp)
-                        Text(
-                            text = "Henüz rapor yok",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = "Rapor üretmek için aşağıdaki butona bas",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
-                        )
+                        Text(stringResource(R.string.no_report_yet), style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+                        Text(stringResource(R.string.generate_report_hint), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                     }
                 }
             }
 
-            // Rapor üretiliyorsa sadece buton spinner gösterir, burada gösterme
-            // Rapor varsa göster
             if (latest != null) {
                 item {
-                    Card(
-                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
+                    Card(elevation = CardDefaults.cardElevation(defaultElevation = 6.dp), modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(
                                 text = latest.content,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    lineHeight = 26.sp
-                                ),
+                                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 26.sp),
                                 softWrap = true,
                                 overflow = TextOverflow.Visible
                             )
                             HorizontalDivider()
                             Text(
-                                text = "Oluşturulma: ${formatReportDate(latest.createdAtMillis)}",
+                                text = stringResource(R.string.report_created_at, formatReportDate(latest.createdAtMillis)),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.Gray
                             )
@@ -191,6 +139,6 @@ fun InsightsScreen(
 }
 
 private fun formatReportDate(millis: Long): String {
-    val sdf = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.forLanguageTag("tr-TR"))
+    val sdf = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
     return sdf.format(Date(millis))
 }

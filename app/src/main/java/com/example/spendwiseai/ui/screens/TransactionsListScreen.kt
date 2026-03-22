@@ -52,7 +52,7 @@ import com.example.spendwiseai.R
 import com.example.spendwiseai.data.db.dao.TransactionWithCategory
 import com.example.spendwiseai.domain.model.TransactionType
 import com.example.spendwiseai.presentation.transactions.TransactionsListViewModel
-import com.example.spendwiseai.ui.components.categoryTr
+import com.example.spendwiseai.ui.components.categoryLocalizedName
 import com.example.spendwiseai.ui.components.expenseCategoryColor
 import com.example.spendwiseai.ui.components.incomeCategoryColor
 import com.example.spendwiseai.ui.theme.NeonGreen
@@ -72,7 +72,9 @@ data class TransactionEditDraft(
 )
 
 private fun groupTransactionsByDay(
-    transactions: List<TransactionWithCategory>
+    transactions: List<TransactionWithCategory>,
+    todayLabel: String,
+    yesterdayLabel: String
 ): Map<String, List<TransactionWithCategory>> {
     val cal = Calendar.getInstance()
     val todayStart = cal.apply {
@@ -80,12 +82,12 @@ private fun groupTransactionsByDay(
         set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
     }.timeInMillis
     val yesterdayStart = todayStart - 86_400_000L
-    val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.forLanguageTag("tr-TR"))
+    val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
     return transactions.groupBy { tx ->
         when {
-            tx.dateMillis >= todayStart -> "Bugün"
-            tx.dateMillis >= yesterdayStart -> "Dün"
-            else -> sdf.format(Date(tx.dateMillis))
+            tx.dateMillis >= todayStart     -> todayLabel
+            tx.dateMillis >= yesterdayStart -> yesterdayLabel
+            else                            -> sdf.format(Date(tx.dateMillis))
         }
     }
 }
@@ -103,6 +105,7 @@ private fun categoryEmoji(category: String): String = when (category) {
     "Health"            -> "💊"
     "Education"         -> "📚"
     "Technology"        -> "💻"
+    "Rent"              -> "🏠"
     "Salary"            -> "💼"
     "Freelance"         -> "🖥️"
     "Refund"            -> "↩️"
@@ -129,9 +132,14 @@ fun TransactionsListScreen(
     var editError by remember { mutableStateOf<String?>(null) }
     var expandedDays by remember { mutableStateOf(setOf<String>()) }
 
-    val grouped = groupTransactionsByDay(stateValue.transactions)
+    val todayLabel      = stringResource(R.string.today)
+    val yesterdayLabel  = stringResource(R.string.yesterday)
+    // onClick lambda içinde stringResource çağrılamaz — önceden alıyoruz
+    val invalidInputMsg = stringResource(R.string.invalid_input)
+
+    val grouped = groupTransactionsByDay(stateValue.transactions, todayLabel, yesterdayLabel)
     val orderedKeys = grouped.keys.sortedWith(compareBy {
-        when (it) { "Bugün" -> 0; "Dün" -> 1; else -> 2 }
+        when (it) { todayLabel -> 0; yesterdayLabel -> 1; else -> 2 }
     })
     val totalAmount = stateValue.transactions.sumOf { it.amount }
 
@@ -139,16 +147,16 @@ fun TransactionsListScreen(
     if (deleteCandidate != null) {
         AlertDialog(
             onDismissRequest = { deleteCandidate = null },
-            title = { Text("İşlemi sil?") },
-            text = { Text("Bu işlem geri alınamaz.") },
+            title = { Text(stringResource(R.string.delete_dialog_title)) },
+            text  = { Text(stringResource(R.string.delete_dialog_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteTransaction(deleteCandidate!!.id)
                     deleteCandidate = null
-                }) { Text(stringResource(id = R.string.delete), color = SoftCoralRed) }
+                }) { Text(stringResource(R.string.delete), color = SoftCoralRed) }
             },
             dismissButton = {
-                TextButton(onClick = { deleteCandidate = null }) { Text("İptal") }
+                TextButton(onClick = { deleteCandidate = null }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -158,28 +166,30 @@ fun TransactionsListScreen(
         val draft = editDraft!!
         AlertDialog(
             onDismissRequest = { editDraft = null; editError = null },
-            title = { Text("İşlemi düzenle") },
+            title = { Text(stringResource(R.string.edit_dialog_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = draft.amount,
                         onValueChange = { editDraft = draft.copy(amount = it); editError = null },
-                        label = { Text("Tutar") }, singleLine = true
+                        label = { Text(stringResource(R.string.amount_label)) },
+                        singleLine = true
                     )
                     OutlinedTextField(
                         value = draft.currency,
                         onValueChange = { editDraft = draft.copy(currency = it) },
-                        label = { Text("Para birimi") }
+                        label = { Text(stringResource(R.string.currency_label)) }
                     )
                     OutlinedTextField(
                         value = draft.categoryName,
                         onValueChange = { editDraft = draft.copy(categoryName = it) },
-                        label = { Text("Kategori") }
+                        label = { Text(stringResource(R.string.category_label)) }
                     )
                     OutlinedTextField(
                         value = draft.description,
                         onValueChange = { editDraft = draft.copy(description = it) },
-                        label = { Text("Açıklama") }, minLines = 2, maxLines = 4
+                        label = { Text(stringResource(R.string.description_label)) },
+                        minLines = 2, maxLines = 4
                     )
                     editError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 }
@@ -188,21 +198,26 @@ fun TransactionsListScreen(
                 TextButton(onClick = {
                     val amount = draft.amount.replace(',', '.').toDoubleOrNull()
                     if (amount == null || draft.currency.isBlank() || draft.categoryName.isBlank()) {
-                        editError = "Lütfen geçerli tutar/para birimi/kategori girin."
+                        // stringResource burada çağrılamaz — önceden alınan değeri kullan
+                        editError = invalidInputMsg
                         return@TextButton
                     }
                     viewModel.updateTransaction(
-                        id = draft.id, amount = amount,
+                        id = draft.id,
+                        amount = amount,
                         currency = draft.currency.trim(),
                         categoryName = draft.categoryName.trim(),
                         description = draft.description,
                         dateMillis = draft.dateMillis
                     )
-                    editDraft = null; editError = null
-                }) { Text("Kaydet", color = accent) }
+                    editDraft = null
+                    editError = null
+                }) { Text(stringResource(R.string.save), color = accent) }
             },
             dismissButton = {
-                TextButton(onClick = { editDraft = null; editError = null }) { Text("İptal") }
+                TextButton(onClick = { editDraft = null; editError = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }
@@ -212,18 +227,10 @@ fun TransactionsListScreen(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // Başlık
         item {
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Text(text = title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         }
 
-        // Özet kart
         if (stateValue.transactions.isNotEmpty()) {
             item {
                 Card(
@@ -239,26 +246,24 @@ fun TransactionsListScreen(
                     ) {
                         Column {
                             Text(
-                                "Toplam ${if (isIncome) "Gelir" else "Gider"}",
+                                if (isIncome) stringResource(R.string.total_income_label)
+                                else stringResource(R.string.total_expense_label),
                                 color = Color.Gray, fontSize = 13.sp
                             )
                             Text(
                                 "${"%.2f".format(totalAmount)} ${stateValue.transactions.firstOrNull()?.currency ?: "TL"}",
-                                color = accent,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp
+                                color = accent, fontWeight = FontWeight.Bold, fontSize = 24.sp
                             )
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("${stateValue.transactions.size} işlem", color = Color.Gray, fontSize = 13.sp)
-                            Text("${grouped.keys.size} gün", color = accent, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                            Text(stringResource(R.string.transaction_count, stateValue.transactions.size), color = Color.Gray, fontSize = 13.sp)
+                            Text(stringResource(R.string.day_count, grouped.keys.size), color = accent, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                         }
                     }
                 }
             }
         }
 
-        // Boş durum
         if (stateValue.transactions.isEmpty()) {
             item {
                 Column(
@@ -268,50 +273,28 @@ fun TransactionsListScreen(
                 ) {
                     Text(if (isIncome) "💰" else "💸", fontSize = 48.sp)
                     Text(
-                        "Henüz ${if (isIncome) "gelir" else "gider"} yok",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.Gray
+                        if (isIncome) stringResource(R.string.no_income_yet)
+                        else stringResource(R.string.no_expense_yet),
+                        style = MaterialTheme.typography.titleMedium, color = Color.Gray
                     )
-                    Text(
-                        "İşlem eklemek için ana sayfadaki butonu kullan",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
-                    )
+                    Text(stringResource(R.string.empty_hint), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
             }
         }
 
         orderedKeys.forEach { dayKey ->
             val txList = grouped[dayKey] ?: return@forEach
-            val isToday = dayKey == "Bugün"
+            val isToday   = dayKey == todayLabel
             val isExpanded = expandedDays.contains(dayKey)
 
-            // SADECE BUGÜN → her işlem swipeable ayrı kart
             if (isToday) {
                 item {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(accent)
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(accent))
                         Spacer(Modifier.width(8.dp))
-                        Text(
-                            dayKey,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = accent,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(dayKey, style = MaterialTheme.typography.labelLarge, color = accent, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.width(8.dp))
-                        Text(
-                            "${txList.size} işlem",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
-                        )
+                        Text(stringResource(R.string.transaction_count, txList.size), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                     }
                 }
 
@@ -335,7 +318,7 @@ fun TransactionsListScreen(
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Icon(Icons.Default.Delete, null, tint = SoftCoralRed, modifier = Modifier.size(24.dp))
-                                        Text("Sil", color = SoftCoralRed, fontSize = 11.sp)
+                                        Text(stringResource(R.string.swipe_to_delete), color = SoftCoralRed, fontSize = 11.sp)
                                     }
                                 }
                             },
@@ -356,20 +339,15 @@ fun TransactionsListScreen(
                 }
             }
 
-            // DÜN VE GEÇMİŞ → özet kart, tıklayınca açılır
             if (!isToday) {
                 item(key = dayKey) {
-                    val total = txList.sumOf { it.amount }
-                    val dotColor = if (dayKey == "Dün") accent else Color.Gray
+                    val total    = txList.sumOf { it.amount }
+                    val dotColor = if (dayKey == yesterdayLabel) accent else Color.Gray
 
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                expandedDays = if (isExpanded)
-                                    expandedDays - dayKey
-                                else expandedDays + dayKey
-                            },
+                        modifier = Modifier.fillMaxWidth().clickable {
+                            expandedDays = if (isExpanded) expandedDays - dayKey else expandedDays + dayKey
+                        },
                         elevation = CardDefaults.cardElevation(2.dp),
                         shape = RoundedCornerShape(20.dp)
                     ) {
@@ -380,46 +358,32 @@ fun TransactionsListScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(8.dp)
-                                            .clip(CircleShape)
-                                            .background(dotColor)
-                                    )
+                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(dotColor))
                                     Spacer(Modifier.width(8.dp))
                                     Column {
                                         Text(
                                             dayKey,
                                             style = MaterialTheme.typography.titleSmall,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = if (dayKey == "Dün") accent else Color.Unspecified
+                                            color = if (dayKey == yesterdayLabel) accent else Color.Unspecified
                                         )
-                                        Text(
-                                            "${txList.size} işlem",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = Color.Gray
-                                        )
+                                        Text(stringResource(R.string.transaction_count, txList.size), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
                                     }
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         "${"%.2f".format(total)} ${txList.firstOrNull()?.currency ?: ""}",
-                                        color = accent,
-                                        fontWeight = FontWeight.Bold,
+                                        color = accent, fontWeight = FontWeight.Bold,
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     Spacer(Modifier.width(4.dp))
                                     Icon(
-                                        if (isExpanded) Icons.Default.KeyboardArrowUp
-                                        else Icons.Default.KeyboardArrowDown,
-                                        contentDescription = null,
-                                        tint = Color.Gray,
-                                        modifier = Modifier.size(20.dp)
+                                        if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                        null, tint = Color.Gray, modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
 
-                            // Expand detaylar
                             if (isExpanded) {
                                 Spacer(Modifier.height(12.dp))
                                 HorizontalDivider(color = Color.Gray.copy(alpha = 0.2f))
@@ -427,43 +391,26 @@ fun TransactionsListScreen(
                                 txList.forEach { tx ->
                                     val catColor = categoryColor(tx.categoryName, isIncome)
                                     Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 5.dp),
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.weight(1f)
-                                        ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                                             Box(
-                                                modifier = Modifier
-                                                    .size(36.dp)
-                                                    .background(catColor.copy(alpha = 0.15f), CircleShape),
+                                                modifier = Modifier.size(36.dp).background(catColor.copy(alpha = 0.15f), CircleShape),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Text(categoryEmoji(tx.categoryName), fontSize = 16.sp)
                                             }
                                             Spacer(Modifier.width(10.dp))
                                             Column {
-                                                Text(
-                                                    categoryTr(tx.categoryName),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    fontWeight = FontWeight.Medium
-                                                )
-                                                Text(
-                                                    tx.description,
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = Color.Gray,
-                                                    maxLines = 1
-                                                )
+                                                Text(categoryLocalizedName(tx.categoryName), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                                                Text(tx.description, style = MaterialTheme.typography.labelSmall, color = Color.Gray, maxLines = 1)
                                             }
                                         }
                                         Text(
                                             "${"%.2f".format(tx.amount)} ${tx.currency}",
-                                            color = catColor,
-                                            fontWeight = FontWeight.Bold,
+                                            color = catColor, fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -488,59 +435,21 @@ private fun TransactionCard(
 ) {
     val catColor = categoryColor(tx.categoryName, isIncome)
 
-    Card(
-        elevation = CardDefaults.cardElevation(2.dp),
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(14.dp).fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .background(catColor.copy(alpha = 0.15f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
+    Card(elevation = CardDefaults.cardElevation(2.dp), shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.padding(14.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(46.dp).background(catColor.copy(alpha = 0.15f), CircleShape), contentAlignment = Alignment.Center) {
                 Text(categoryEmoji(tx.categoryName), fontSize = 20.sp)
             }
-
             Spacer(Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    categoryTr(tx.categoryName),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    tx.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    maxLines = 1
-                )
-                Text(
-                    SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(tx.dateMillis)),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
-                )
+                Text(categoryLocalizedName(tx.categoryName), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Text(tx.description, style = MaterialTheme.typography.bodySmall, color = Color.Gray, maxLines = 1)
+                Text(SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(tx.dateMillis)), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             }
-
             Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    "${"%.2f".format(tx.amount)} ${tx.currency}",
-                    color = catColor,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                )
+                Text("${"%.2f".format(tx.amount)} ${tx.currency}", color = catColor, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 IconButton(onClick = onEditClick, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Düzenle",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit), tint = Color.Gray, modifier = Modifier.size(16.dp))
                 }
             }
         }

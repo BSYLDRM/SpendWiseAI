@@ -86,12 +86,12 @@ fun HomeScreen(
             ) {
                 Column {
                     Text(
-                        text = "Merhaba 👋",
+                        text = stringResource(R.string.greeting),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )
                     Text(
-                        text = stringResource(id = R.string.app_name),
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -99,7 +99,7 @@ fun HomeScreen(
             }
         }
 
-        // Bakiye kartı — gradient arka plan
+        // Bakiye kartı
         item {
             Card(
                 shape = RoundedCornerShape(24.dp),
@@ -111,10 +111,7 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .background(
                             brush = Brush.linearGradient(
-                                colors = listOf(
-                                    AppBackground,
-                                    Color(0xFF0D1117)
-                                )
+                                colors = listOf(AppBackground, Color(0xFF0D1117))
                             ),
                             shape = RoundedCornerShape(24.dp)
                         )
@@ -129,10 +126,9 @@ fun HomeScreen(
                         }
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            // Toplam bakiye
                             Column {
                                 Text(
-                                    "Toplam Bakiye",
+                                    stringResource(R.string.total_balance),
                                     color = Color.Gray,
                                     fontSize = 13.sp
                                 )
@@ -144,7 +140,6 @@ fun HomeScreen(
                                 )
                             }
 
-                            // Gelir / Gider yan yana
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -153,10 +148,7 @@ fun HomeScreen(
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .background(
-                                            NeonGreen.copy(alpha = 0.12f),
-                                            RoundedCornerShape(16.dp)
-                                        )
+                                        .background(NeonGreen.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
                                         .padding(12.dp)
                                 ) {
                                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -167,15 +159,10 @@ fun HomeScreen(
                                                     .background(NeonGreen.copy(alpha = 0.2f), CircleShape),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                Icon(
-                                                    Icons.Default.TrendingUp,
-                                                    contentDescription = null,
-                                                    tint = NeonGreen,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
+                                                Icon(Icons.Default.TrendingUp, null, tint = NeonGreen, modifier = Modifier.size(16.dp))
                                             }
                                             Spacer(Modifier.width(6.dp))
-                                            Text("Gelir", color = Color.Gray, fontSize = 12.sp)
+                                            Text(stringResource(R.string.income), color = Color.Gray, fontSize = 12.sp)
                                         }
                                         Text(
                                             "$selectedCurrency ${String.format("%.2f", dashboardState.totalIncome)}",
@@ -190,10 +177,7 @@ fun HomeScreen(
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .background(
-                                            SoftCoralRed.copy(alpha = 0.12f),
-                                            RoundedCornerShape(16.dp)
-                                        )
+                                        .background(SoftCoralRed.copy(alpha = 0.12f), RoundedCornerShape(16.dp))
                                         .padding(12.dp)
                                 ) {
                                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -204,15 +188,10 @@ fun HomeScreen(
                                                     .background(SoftCoralRed.copy(alpha = 0.2f), CircleShape),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                Icon(
-                                                    Icons.Default.TrendingDown,
-                                                    contentDescription = null,
-                                                    tint = SoftCoralRed,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
+                                                Icon(Icons.Default.TrendingDown, null, tint = SoftCoralRed, modifier = Modifier.size(16.dp))
                                             }
                                             Spacer(Modifier.width(6.dp))
-                                            Text("Gider", color = Color.Gray, fontSize = 12.sp)
+                                            Text(stringResource(R.string.expense), color = Color.Gray, fontSize = 12.sp)
                                         }
                                         Text(
                                             "$selectedCurrency ${String.format("%.2f", dashboardState.totalExpense)}",
@@ -233,7 +212,7 @@ fun HomeScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Bugünkü harcama", color = Color.Gray, fontSize = 13.sp)
+                                Text(stringResource(R.string.todays_spending), color = Color.Gray, fontSize = 13.sp)
                                 Text(
                                     "$selectedCurrency ${String.format("%.2f", dashboardState.dailySpending)}",
                                     color = SoftCoralRed,
@@ -257,7 +236,7 @@ fun HomeScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            "Finansal Grafik",
+                            stringResource(R.string.financial_chart),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -267,17 +246,17 @@ fun HomeScreen(
                             Tab(
                                 selected = selectedTab == 0,
                                 onClick = { selectedTab = 0 },
-                                text = { Text("Giderler", fontSize = 12.sp) }
+                                text = { Text(stringResource(R.string.expenses_tab), fontSize = 12.sp) }
                             )
                             Tab(
                                 selected = selectedTab == 1,
                                 onClick = { selectedTab = 1 },
-                                text = { Text("Gelirler", fontSize = 12.sp) }
+                                text = { Text(stringResource(R.string.incomes_tab), fontSize = 12.sp) }
                             )
                             Tab(
                                 selected = selectedTab == 2,
                                 onClick = { selectedTab = 2 },
-                                text = { Text("Net", fontSize = 12.sp) }
+                                text = { Text(stringResource(R.string.net_tab), fontSize = 12.sp) }
                             )
                         }
 
@@ -286,27 +265,21 @@ fun HomeScreen(
                         when (selectedTab) {
                             0 -> {
                                 if (dashboardState.expenseCategoryTotals.isEmpty()) {
-                                    EmptyChart("Henüz gider verisi yok")
+                                    EmptyChart(stringResource(R.string.no_expense_data))
                                 } else {
-                                    DoughnutChart(
-                                        categoryTotals = dashboardState.expenseCategoryTotals,
-                                        isIncome = false
-                                    )
+                                    DoughnutChart(categoryTotals = dashboardState.expenseCategoryTotals, isIncome = false)
                                 }
                             }
                             1 -> {
                                 if (dashboardState.incomeCategoryTotals.isEmpty()) {
-                                    EmptyChart("Henüz gelir verisi yok")
+                                    EmptyChart(stringResource(R.string.no_income_data))
                                 } else {
-                                    DoughnutChart(
-                                        categoryTotals = dashboardState.incomeCategoryTotals,
-                                        isIncome = true
-                                    )
+                                    DoughnutChart(categoryTotals = dashboardState.incomeCategoryTotals, isIncome = true)
                                 }
                             }
                             2 -> {
                                 if (dashboardState.totalIncome == 0.0 && dashboardState.totalExpense == 0.0) {
-                                    EmptyChart("Henüz veri yok")
+                                    EmptyChart(stringResource(R.string.no_data_yet))
                                 } else {
                                     NetBarChart(
                                         income = dashboardState.totalIncome,
@@ -321,24 +294,18 @@ fun HomeScreen(
             }
         }
 
-        // Harcama Ekle butonu
+        // İşlem Ekle butonu
         item {
             Button(
                 onClick = onAddExpenseClicked,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = Color.Black
-                )
+                Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.Black)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "İşlem Ekle",
+                    stringResource(R.string.add_transaction),
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -350,12 +317,7 @@ fun HomeScreen(
 
 @Composable
 private fun EmptyChart(message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
         Text(message, color = Color.Gray)
     }
 }
@@ -367,115 +329,52 @@ private fun NetBarChart(income: Double, expense: Double, currency: String) {
     val expenseRatio = (expense / maxValue).toFloat().coerceIn(0.05f, 1f)
 
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text(
-            "Gelir vs Gider",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Text(stringResource(R.string.income_vs_expense), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
 
         // Gelir bar
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.TrendingUp,
-                        contentDescription = null,
-                        tint = NeonGreen,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Icon(Icons.Default.TrendingUp, null, tint = NeonGreen, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Gelir", color = NeonGreen, fontSize = 13.sp)
+                    Text(stringResource(R.string.income), color = NeonGreen, fontSize = 13.sp)
                 }
-                Text(
-                    "$currency ${String.format("%.2f", income)}",
-                    color = NeonGreen,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                )
+                Text("$currency ${String.format("%.2f", income)}", color = NeonGreen, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(14.dp)
-                    .background(NeonGreen.copy(alpha = 0.15f), RoundedCornerShape(50))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(incomeRatio)
-                        .height(14.dp)
-                        .background(
-                            Brush.horizontalGradient(listOf(NeonGreen, NeonGreen.copy(alpha = 0.7f))),
-                            RoundedCornerShape(50)
-                        )
-                )
+            Box(modifier = Modifier.fillMaxWidth().height(14.dp).background(NeonGreen.copy(alpha = 0.15f), RoundedCornerShape(50))) {
+                Box(modifier = Modifier.fillMaxWidth(incomeRatio).height(14.dp).background(
+                    Brush.horizontalGradient(listOf(NeonGreen, NeonGreen.copy(alpha = 0.7f))), RoundedCornerShape(50)
+                ))
             }
         }
 
         // Gider bar
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.TrendingDown,
-                        contentDescription = null,
-                        tint = SoftCoralRed,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Icon(Icons.Default.TrendingDown, null, tint = SoftCoralRed, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Gider", color = SoftCoralRed, fontSize = 13.sp)
+                    Text(stringResource(R.string.expense), color = SoftCoralRed, fontSize = 13.sp)
                 }
-                Text(
-                    "$currency ${String.format("%.2f", expense)}",
-                    color = SoftCoralRed,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                )
+                Text("$currency ${String.format("%.2f", expense)}", color = SoftCoralRed, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(14.dp)
-                    .background(SoftCoralRed.copy(alpha = 0.15f), RoundedCornerShape(50))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(expenseRatio)
-                        .height(14.dp)
-                        .background(
-                            Brush.horizontalGradient(listOf(SoftCoralRed, SoftCoralRed.copy(alpha = 0.7f))),
-                            RoundedCornerShape(50)
-                        )
-                )
+            Box(modifier = Modifier.fillMaxWidth().height(14.dp).background(SoftCoralRed.copy(alpha = 0.15f), RoundedCornerShape(50))) {
+                Box(modifier = Modifier.fillMaxWidth(expenseRatio).height(14.dp).background(
+                    Brush.horizontalGradient(listOf(SoftCoralRed, SoftCoralRed.copy(alpha = 0.7f))), RoundedCornerShape(50)
+                ))
             }
         }
 
-        // Net durum özeti
+        // Net durum
         val net = income - expense
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    if (net >= 0) NeonGreen.copy(alpha = 0.1f) else SoftCoralRed.copy(alpha = 0.1f),
-                    RoundedCornerShape(12.dp)
-                )
+                .background(if (net >= 0) NeonGreen.copy(alpha = 0.1f) else SoftCoralRed.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
                 .padding(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Net Durum",
-                    color = Color.Gray,
-                    fontSize = 13.sp
-                )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.net_status), color = Color.Gray, fontSize = 13.sp)
                 Text(
                     "${if (net >= 0) "+" else ""}$currency ${String.format("%.2f", net)}",
                     color = if (net >= 0) NeonGreen else SoftCoralRed,

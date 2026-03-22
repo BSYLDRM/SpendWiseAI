@@ -59,66 +59,26 @@ fun SpendWiseApp() {
     var selectedLanguage by remember { mutableStateOf(LocaleManager.getLanguageTag(context)) }
     var selectedCurrency by remember { mutableStateOf(LocaleManager.getCurrency(context)) }
 
-    val currentRoute = navController
-        .currentBackStackEntryAsState()
-        .value
-        ?.destination
-        ?.route
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     Scaffold(
         bottomBar = {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .background(MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth().height(64.dp).background(MaterialTheme.colorScheme.surface),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                BottomNavItem(
-                    selected = currentRoute == Routes.Home,
-                    onClick = { navController.navigateToBottomTab(Routes.Home) },
-                    icon = Icons.Default.Home,
-                    label = "Anasayfa"
-                )
-                BottomNavItem(
-                    selected = currentRoute == Routes.Expenses,
-                    onClick = { navController.navigateToBottomTab(Routes.Expenses) },
-                    icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                    label = "Gider"
-                )
-                BottomNavItem(
-                    selected = currentRoute == Routes.Incomes,
-                    onClick = { navController.navigateToBottomTab(Routes.Incomes) },
-                    icon = Icons.Default.AccountBalanceWallet,
-                    label = "Gelir"
-                )
-                BottomNavItem(
-                    selected = currentRoute == Routes.Insights,
-                    onClick = { navController.navigateToBottomTab(Routes.Insights) },
-                    icon = Icons.Default.Analytics,
-                    label = "AI Koç"
-                )
-                BottomNavItem(
-                    selected = currentRoute == Routes.Budget,
-                    onClick = { navController.navigateToBottomTab(Routes.Budget) },
-                    icon = Icons.Default.Flag,
-                    label = "Bütçe"
-                )
-                BottomNavItem(
-                    selected = false,
-                    onClick = { showSettings = true },
-                    icon = Icons.Default.Settings,
-                    label = "Ayarlar"
-                )
+                BottomNavItem(selected = currentRoute == Routes.Home,    onClick = { navController.navigateToBottomTab(Routes.Home) },    icon = Icons.Default.Home,                               label = stringResource(R.string.nav_home))
+                BottomNavItem(selected = currentRoute == Routes.Expenses, onClick = { navController.navigateToBottomTab(Routes.Expenses) }, icon = Icons.AutoMirrored.Filled.ReceiptLong,            label = stringResource(R.string.nav_expense))
+                BottomNavItem(selected = currentRoute == Routes.Incomes,  onClick = { navController.navigateToBottomTab(Routes.Incomes) },  icon = Icons.Default.AccountBalanceWallet,               label = stringResource(R.string.nav_income))
+                BottomNavItem(selected = currentRoute == Routes.Insights, onClick = { navController.navigateToBottomTab(Routes.Insights) }, icon = Icons.Default.Analytics,                         label = stringResource(R.string.nav_ai_coach))
+                BottomNavItem(selected = currentRoute == Routes.Budget,   onClick = { navController.navigateToBottomTab(Routes.Budget) },   icon = Icons.Default.Flag,                              label = stringResource(R.string.nav_budget))
+                BottomNavItem(selected = false,                           onClick = { showSettings = true },                               icon = Icons.Default.Settings,                          label = stringResource(R.string.nav_settings))
             }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            SpendWiseNavHost(
-                navController = navController,
-                appContainer = appContainer
-            )
+            SpendWiseNavHost(navController = navController, appContainer = appContainer)
         }
     }
 
@@ -128,16 +88,13 @@ fun SpendWiseApp() {
             containerColor = Color.White,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text("⚙️ Ayarlar", style = MaterialTheme.typography.titleLarge, color = Color.Black)
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.titleLarge, color = Color.Black)
                 Spacer(Modifier.height(8.dp))
 
-                Text("🌐 Dil", style = MaterialTheme.typography.titleMedium, color = Color.Black)
+                Text(stringResource(R.string.language_label), style = MaterialTheme.typography.titleMedium, color = Color.Black)
                 SettingsOptionRow(
-                    label = "Türkçe 🇹🇷",
+                    label = stringResource(R.string.lang_turkish),
                     selected = selectedLanguage == "tr",
                     onSelect = {
                         selectedLanguage = "tr"
@@ -147,7 +104,7 @@ fun SpendWiseApp() {
                 )
                 HorizontalDivider()
                 SettingsOptionRow(
-                    label = "English 🇬🇧",
+                    label = stringResource(R.string.lang_english),
                     selected = selectedLanguage == "en",
                     onSelect = {
                         selectedLanguage = "en"
@@ -157,7 +114,7 @@ fun SpendWiseApp() {
                 )
 
                 Spacer(Modifier.height(12.dp))
-                Text("💱 Para Birimi", style = MaterialTheme.typography.titleMedium, color = Color.Black)
+                Text(stringResource(R.string.currency_section), style = MaterialTheme.typography.titleMedium, color = Color.Black)
                 listOf("TL", "USD", "EUR").forEach { currency ->
                     SettingsOptionRow(
                         label = currency,
@@ -176,41 +133,20 @@ fun SpendWiseApp() {
 }
 
 @Composable
-private fun BottomNavItem(
-    selected: Boolean,
-    onClick: () -> Unit,
-    icon: ImageVector,
-    label: String
-) {
+private fun BottomNavItem(selected: Boolean, onClick: () -> Unit, icon: ImageVector, label: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 8.dp)
+        modifier = Modifier.clickable(onClick = onClick).padding(horizontal = 4.dp, vertical = 8.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = label,
-            fontSize = 9.sp,
-            color = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1
-        )
+        Icon(imageVector = icon, contentDescription = label, tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text = label, fontSize = 9.sp, color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
     }
 }
 
 @Composable
 private fun SettingsOptionRow(label: String, selected: Boolean, onSelect: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onSelect)
-            .padding(vertical = 10.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onSelect).padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -220,18 +156,16 @@ private fun SettingsOptionRow(label: String, selected: Boolean, onSelect: () -> 
 }
 
 private object Routes {
-    const val Home = "home"
+    const val Home     = "home"
     const val Expenses = "expenses"
-    const val Incomes = "incomes"
+    const val Incomes  = "incomes"
     const val Insights = "insights"
-    const val Budget = "budget"
+    const val Budget   = "budget"
 }
 
 private fun androidx.navigation.NavHostController.navigateToBottomTab(route: String) {
     navigate(route) {
-        popUpTo(graph.findStartDestination().id) {
-            saveState = true
-        }
+        popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
     }

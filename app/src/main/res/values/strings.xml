@@ -1,18 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Akilli Harca ve Biriktir</string>
+    <!-- App name — stays English always -->
+    <string name="app_name">SpendWise AI</string>
 
-    <string name="total_balance">Toplam Bakiye</string>
-    <string name="daily_spending">Gunluk Harcama</string>
-    <string name="scan_receipt">Fis Tara</string>
-    <string name="income">Gelir</string>
-    <string name="expense">Gider</string>
-    <string name="add">Islem Ekle</string>
-    <string name="delete">Sil</string>
+    <!-- Bottom Nav -->
+    <string name="nav_home">Home</string>
+    <string name="nav_expense">Expenses</string>
+    <string name="nav_income">Income</string>
+    <string name="nav_ai_coach">AI Coach</string>
+    <string name="nav_budget">Budget</string>
+    <string name="nav_settings">Settings</string>
 
-    <string name="analyzing_receipt">Fis analiz ediliyor...</string>
-    <string name="confirm_and_save">Onayla ve Kaydet</string>
-    <string name="take_receipt_photo">Fis fotografi cek</string>
-    <string name="camera">Kamera</string>
-    <string name="receipt_preview">Fis onizlemesi</string>
-    <string name="ai_parsed_preview">YZ Cozumleme Onizlemesi</string>
+    <!-- Common -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="back">Back</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="transaction_count">%d transactions</string>
+    <string name="day_count">%d days</string>
+
+    <!-- Home Screen -->
+    <string name="greeting">Hello 👋</string>
+    <string name="total_balance">Total Balance</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+    <string name="todays_spending">Today\'s spending</string>
+    <string name="financial_chart">Financial Chart</string>
+    <string name="expenses_tab">Expenses</string>
+    <string name="incomes_tab">Incomes</string>
+    <string name="net_tab">Net</string>
+    <string name="add_transaction">Add Transaction</string>
+    <string name="income_vs_expense">Income vs Expense</string>
+    <string name="net_status">Net Status</string>
+    <string name="no_expense_data">No expense data yet</string>
+    <string name="no_income_data">No income data yet</string>
+    <string name="no_data_yet">No data yet</string>
+
+    <!-- Add Expense Screen -->
+    <string name="add_expense_title">Add Expense</string>
+    <string name="add_income_title">Add Income</string>
+    <string name="analyze_with_ai">🤖 Analyze with AI</string>
+    <string name="processing">Processing…</string>
+    <string name="ai_result_title">🤖 AI Analysis Result</string>
+    <string name="confirm_question">Correct? Press Save.</string>
+    <string name="successfully_saved">Successfully saved!</string>
+    <string name="go_home">Go to Home</string>
+    <string name="placeholder_income">How much did you earn? Example:\n• Salary 15000 TL\n• Freelance project 3500 TL\n• Rent refund 800 TL\n• Meal allowance 500 TL received</string>
+    <string name="placeholder_expense">What did you spend on? Example:\n• 250 TL grocery shopping\n• Coffee and sandwich 85 TL\n• Gas 400 TL\n• Netflix subscription 120 TL</string>
+
+    <!-- Transactions List Screen -->
+    <string name="total_income_label">Total Income</string>
+    <string name="total_expense_label">Total Expense</string>
+    <string name="no_income_yet">No income yet</string>
+    <string name="no_expense_yet">No expense yet</string>
+    <string name="empty_hint">Use the button on the home screen to add transactions</string>
+    <string name="delete_dialog_title">Delete transaction?</string>
+    <string name="delete_dialog_body">This action cannot be undone.</string>
+    <string name="edit_dialog_title">Edit transaction</string>
+    <string name="amount_label">Amount</string>
+    <string name="currency_label">Currency</string>
+    <string name="category_label">Category</string>
+    <string name="description_label">Description</string>
+    <string name="invalid_input">Please enter valid amount / currency / category.</string>
+    <string name="swipe_to_delete">Delete</string>
+
+    <!-- Budget Screen -->
+    <string name="budget_title">Budget Tracker</string>
+    <string name="set_monthly_budget">Set Monthly Budget</string>
+    <string name="budget_amount_hint">Budget amount</string>
+    <string name="percent_used">%d%% used</string>
+    <string name="budget_ok">✅ Budget under control</string>
+    <string name="budget_warn">⚡ Getting close to budget</string>
+    <string name="budget_over">⚠️ You exceeded your budget!</string>
+    <string name="spent_label">Spent</string>
+    <string name="budget_label">Budget</string>
+    <string name="remaining_label">Remaining</string>
+    <string name="category_breakdown">Category Breakdown</string>
+    <string name="prev_month">Previous month</string>
+    <string name="next_month">Next month</string>
+
+    <!-- Insights Screen -->
+    <string name="ai_coach_title">AI Finance Coach 🤖</string>
+    <string name="last_analysis">Last analysis: %s</string>
+    <string name="no_analysis_yet">No analysis yet</string>
+    <string name="no_report_yet">No report yet</string>
+    <string name="generate_report_hint">Press the button below to generate a report</string>
+    <string name="generate_report_btn">🔄 Generate New Report</string>
+    <string name="ai_analyzing">  AI analyzing…</string>
+    <string name="report_created_at">Created: %s</string>
+
+    <!-- Settings -->
+    <string name="settings_title">⚙️ Settings</string>
+    <string name="language_label">🌐 Language</string>
+    <string name="currency_section">💱 Currency</string>
+    <string name="lang_turkish">Türkçe 🇹🇷</string>
+    <string name="lang_english">English 🇬🇧</string>
+
+    <!-- Categories — expense -->
+    <string name="cat_groceries">Groceries</string>
+    <string name="cat_food_drink">Food &amp; Drink</string>
+    <string name="cat_transportation">Transportation</string>
+    <string name="cat_entertainment">Entertainment</string>
+    <string name="cat_shopping">Shopping</string>
+    <string name="cat_bills">Bills &amp; Utilities</string>
+    <string name="cat_health">Health</string>
+    <string name="cat_education">Education</string>
+    <string name="cat_technology">Technology</string>
+    <string name="cat_rent">Rent</string>
+    <string name="cat_other">Other</string>
+    <!-- Receipt scanning -->
+    <string name="scan_receipt">Scan Receipt</string>
+    <string name="analyzing_receipt">Analyzing receipt…</string>
+    <string name="confirm_and_save">Confirm &amp; Save</string>
+    <string name="take_receipt_photo">Take receipt photo</string>
+    <string name="camera">Camera</string>
+    <string name="receipt_preview">Receipt Preview</string>
+    <string name="ai_parsed_preview">AI Parsed Preview</string>
+
+    <!-- Categories — income -->
+    <string name="cat_salary">Salary</string>
+    <string name="cat_freelance">Freelance</string>
+    <string name="cat_refund">Refund</string>
+    <string name="cat_meal_allowance">Meal Allowance</string>
+    <string name="cat_investment">Investment</string>
+    <string name="cat_gift">Gift</string>
+    <string name="cat_other_income">Other Income</string>
 </resources>

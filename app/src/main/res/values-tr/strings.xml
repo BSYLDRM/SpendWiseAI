@@ -1,20 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Akıllı Harca ve Kazan</string>
+    <!-- App name — İngilizce kalıyor, override etmiyoruz -->
+    <string name="app_name">SpendWise AI</string>
 
-    <!-- Core labels (TR) -->
+    <!-- Bottom Nav -->
+    <string name="nav_home">Anasayfa</string>
+    <string name="nav_expense">Gider</string>
+    <string name="nav_income">Gelir</string>
+    <string name="nav_ai_coach">AI Koç</string>
+    <string name="nav_budget">Bütçe</string>
+    <string name="nav_settings">Ayarlar</string>
+
+    <!-- Common -->
+    <string name="save">Kaydet</string>
+    <string name="cancel">İptal</string>
+    <string name="delete">Sil</string>
+    <string name="edit">Düzenle</string>
+    <string name="back">Geri</string>
+    <string name="today">Bugün</string>
+    <string name="yesterday">Dün</string>
+    <string name="transaction_count">%d işlem</string>
+    <string name="day_count">%d gün</string>
+
+    <!-- Home Screen -->
+    <string name="greeting">Merhaba 👋</string>
     <string name="total_balance">Toplam Bakiye</string>
-    <string name="daily_spending">Günlük Harcama</string>
-    <string name="scan_receipt">Fiş Tara</string>
     <string name="income">Gelir</string>
     <string name="expense">Gider</string>
-    <string name="add">Ekle</string>
-    <string name="delete">Sil</string>
+    <string name="todays_spending">Bugünkü harcama</string>
+    <string name="financial_chart">Finansal Grafik</string>
+    <string name="expenses_tab">Giderler</string>
+    <string name="incomes_tab">Gelirler</string>
+    <string name="net_tab">Net</string>
+    <string name="add_transaction">İşlem Ekle</string>
+    <string name="income_vs_expense">Gelir vs Gider</string>
+    <string name="net_status">Net Durum</string>
+    <string name="no_expense_data">Henüz gider verisi yok</string>
+    <string name="no_income_data">Henüz gelir verisi yok</string>
+    <string name="no_data_yet">Henüz veri yok</string>
 
+    <!-- Add Expense Screen -->
+    <string name="add_expense_title">Gider Ekle</string>
+    <string name="add_income_title">Gelir Ekle</string>
+    <string name="analyze_with_ai">🤖 AI ile Analiz Et</string>
+    <string name="processing">İşleniyor…</string>
+    <string name="ai_result_title">🤖 AI Analiz Sonucu</string>
+    <string name="confirm_question">Doğru mu? Kaydet butonuna bas.</string>
+    <string name="successfully_saved">Başarıyla kaydedildi!</string>
+    <string name="go_home">Ana sayfaya dön</string>
+    <string name="placeholder_income">Ne kadar kazandın? Örnek:\n• Maaş 15000 TL\n• Freelance proje 3500 TL\n• Kira iadesi 800 TL\n• Yemek parası 500 TL geldi</string>
+    <string name="placeholder_expense">Ne harcadın? Örnek:\n• 250 TL market alışverişi\n• Kahve ve sandviç 85 TL\n• Benzin 400 TL\n• Netflix aboneliği 120 TL</string>
+
+    <!-- Transactions List Screen -->
+    <string name="total_income_label">Toplam Gelir</string>
+    <string name="total_expense_label">Toplam Gider</string>
+    <string name="no_income_yet">Henüz gelir yok</string>
+    <string name="no_expense_yet">Henüz gider yok</string>
+    <string name="empty_hint">İşlem eklemek için ana sayfadaki butonu kullan</string>
+    <string name="delete_dialog_title">İşlemi sil?</string>
+    <string name="delete_dialog_body">Bu işlem geri alınamaz.</string>
+    <string name="edit_dialog_title">İşlemi düzenle</string>
+    <string name="amount_label">Tutar</string>
+    <string name="currency_label">Para birimi</string>
+    <string name="category_label">Kategori</string>
+    <string name="description_label">Açıklama</string>
+    <string name="invalid_input">Lütfen geçerli tutar/para birimi/kategori girin.</string>
+    <string name="swipe_to_delete">Sil</string>
+
+    <!-- Budget Screen -->
+    <string name="budget_title">Bütçe Takibi</string>
+    <string name="set_monthly_budget">Aylık Bütçe Belirle</string>
+    <string name="budget_amount_hint">Bütçe miktarı</string>
+    <string name="percent_used">%d%% kullanıldı</string>
+    <string name="budget_ok">✅ Bütçe kontrolünde</string>
+    <string name="budget_warn">⚡ Bütçene yaklaştın</string>
+    <string name="budget_over">⚠️ Bütçeni aştın!</string>
+    <string name="spent_label">Harcanan</string>
+    <string name="budget_label">Bütçe</string>
+    <string name="remaining_label">Kalan</string>
+    <string name="category_breakdown">Kategori Dağılımı</string>
+    <string name="prev_month">Önceki ay</string>
+    <string name="next_month">Sonraki ay</string>
+
+    <!-- Insights Screen -->
+    <string name="ai_coach_title">AI Finans Koçun 🤖</string>
+    <string name="last_analysis">Son analiz: %s</string>
+    <string name="no_analysis_yet">Henüz analiz yapılmadı</string>
+    <string name="no_report_yet">Henüz rapor yok</string>
+    <string name="generate_report_hint">Rapor üretmek için aşağıdaki butona bas</string>
+    <string name="generate_report_btn">🔄 Yeni Rapor Üret</string>
+    <string name="ai_analyzing">  AI analiz ediyor…</string>
+    <string name="report_created_at">Oluşturulma: %s</string>
+
+    <!-- Settings -->
+    <string name="settings_title">⚙️ Ayarlar</string>
+    <string name="language_label">🌐 Dil</string>
+    <string name="currency_section">💱 Para Birimi</string>
+    <string name="lang_turkish">Türkçe 🇹🇷</string>
+    <string name="lang_english">English 🇬🇧</string>
+
+    <!-- Categories — expense -->
+    <string name="cat_groceries">Market</string>
+    <string name="cat_food_drink">Yemek &amp; İçecek</string>
+    <string name="cat_transportation">Ulaşım</string>
+    <string name="cat_entertainment">Eğlence</string>
+    <string name="cat_shopping">Alışveriş</string>
+    <string name="cat_bills">Faturalar</string>
+    <string name="cat_health">Sağlık</string>
+    <string name="cat_education">Eğitim</string>
+    <string name="cat_technology">Teknoloji</string>
+    <string name="cat_rent">Kira</string>
+    <string name="cat_other">Diğer</string>
     <!-- Receipt scanning -->
+    <string name="scan_receipt">Fiş Tara</string>
     <string name="analyzing_receipt">Fiş analiz ediliyor…</string>
     <string name="confirm_and_save">Onayla ve Kaydet</string>
     <string name="take_receipt_photo">Fiş fotoğrafı çek</string>
     <string name="camera">Kamera</string>
-    <string name="receipt_preview">Fiş önizleme</string>
+    <string name="receipt_preview">Fiş Önizleme</string>
     <string name="ai_parsed_preview">AI Ayrıştırılmış Önizleme</string>
+
+    <!-- Categories — income -->
+    <string name="cat_salary">Maaş</string>
+    <string name="cat_freelance">Freelance</string>
+    <string name="cat_refund">İade</string>
+    <string name="cat_meal_allowance">Yemek Parası</string>
+    <string name="cat_investment">Yatırım</string>
+    <string name="cat_gift">Hediye</string>
+    <string name="cat_other_income">Diğer Gelir</string>
 </resources>

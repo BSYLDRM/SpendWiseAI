@@ -43,11 +43,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.spendwiseai.R
 import com.example.spendwiseai.core.LocaleManager
 import com.example.spendwiseai.domain.model.ParsedTransaction
 import com.example.spendwiseai.domain.model.TransactionType
 import com.example.spendwiseai.presentation.expense.AddExpenseViewModel
+import com.example.spendwiseai.ui.components.categoryLocalizedName
 import com.example.spendwiseai.ui.theme.NeonGreen
 import com.example.spendwiseai.ui.theme.SoftCoralRed
 import kotlinx.coroutines.delay
@@ -68,22 +71,15 @@ fun AddExpenseScreen(
     val coroutineScope = rememberCoroutineScope()
     val preview = state.preview
     val accent = if (selectedType == TransactionType.INCOME) NeonGreen else SoftCoralRed
-    val screenTitle = if (selectedType == TransactionType.INCOME) "Gelir Ekle" else "Gider Ekle"
+    val screenTitle = if (selectedType == TransactionType.INCOME)
+        stringResource(R.string.add_income_title)
+    else
+        stringResource(R.string.add_expense_title)
 
-    // Tipe göre placeholder metni
-    val placeholderText = if (selectedType == TransactionType.INCOME) {
-        "Ne kadar kazandın? Örnek:\n" +
-                "• Maaş 15000 TL\n" +
-                "• Freelance proje 3500 TL\n" +
-                "• Kira iadesi 800 TL\n" +
-                "• Yemek parası 500 TL geldi"
-    } else {
-        "Ne harcadın? Örnek:\n" +
-                "• 250 TL market alışverişi\n" +
-                "• Kahve ve sandviç 85 TL\n" +
-                "• Benzin 400 TL\n" +
-                "• Netflix aboneliği 120 TL"
-    }
+    val placeholderText = if (selectedType == TransactionType.INCOME)
+        stringResource(R.string.placeholder_income)
+    else
+        stringResource(R.string.placeholder_expense)
 
     LazyColumn(
         state = listState,
@@ -98,12 +94,9 @@ fun AddExpenseScreen(
     ) {
         // Başlık + geri
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                 }
                 Text(text = screenTitle, style = MaterialTheme.typography.headlineMedium)
             }
@@ -111,23 +104,20 @@ fun AddExpenseScreen(
 
         // Gider / Gelir toggle
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (selectedType == TransactionType.EXPENSE) {
                     Button(
                         onClick = { viewModel.onTypeChanged(TransactionType.EXPENSE) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SoftCoralRed)
-                    ) { Text("💸 Gider") }
+                    ) { Text("💸 ${stringResource(R.string.expense)}") }
                 } else {
                     OutlinedButton(
                         onClick = { viewModel.onTypeChanged(TransactionType.EXPENSE) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
-                    ) { Text("💸 Gider") }
+                    ) { Text("💸 ${stringResource(R.string.expense)}") }
                 }
 
                 if (selectedType == TransactionType.INCOME) {
@@ -136,18 +126,18 @@ fun AddExpenseScreen(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
-                    ) { Text("💰 Gelir") }
+                    ) { Text("💰 ${stringResource(R.string.income)}") }
                 } else {
                     OutlinedButton(
                         onClick = { viewModel.onTypeChanged(TransactionType.INCOME) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
-                    ) { Text("💰 Gelir") }
+                    ) { Text("💰 ${stringResource(R.string.income)}") }
                 }
             }
         }
 
-        // Metin girişi — placeholder tipe göre değişir
+        // Metin girişi
         item {
             OutlinedTextField(
                 value = state.inputText,
@@ -167,14 +157,11 @@ fun AddExpenseScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (state.isSubmitting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.width(18.dp).height(18.dp),
-                        strokeWidth = 2.dp
-                    )
+                    CircularProgressIndicator(modifier = Modifier.width(18.dp).height(18.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text("İşleniyor...")
+                    Text(stringResource(R.string.processing))
                 } else {
-                    Text("🤖 AI ile Analiz Et")
+                    Text(stringResource(R.string.analyze_with_ai))
                 }
             }
         }
@@ -187,52 +174,36 @@ fun AddExpenseScreen(
         // Preview kartı
         preview?.let { parsed ->
             item {
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn(animationSpec = tween(280)),
-                    exit = fadeOut(animationSpec = tween(200))
-                ) {
-                    PreviewCard(
-                        parsed = parsed,
-                        accent = accent,
-                        displayCurrency = selectedCurrency
-                    )
+                AnimatedVisibility(visible = true, enter = fadeIn(tween(280)), exit = fadeOut(tween(200))) {
+                    PreviewCard(parsed = parsed, accent = accent, displayCurrency = selectedCurrency)
                 }
             }
         }
 
-        // Kaydet butonu — preview var, henüz kaydedilmemiş
+        // Kaydet butonu
         if (preview != null && state.lastTransactionId == null) {
             item {
                 Button(
                     onClick = { viewModel.confirmSave() },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = accent)
-                ) { Text("✅ Kaydet") }
+                ) { Text("✅ ${stringResource(R.string.save)}") }
             }
         }
 
-        // Başarı + Ana sayfaya dön
+        // Başarı
         if (state.lastTransactionId != null) {
             item {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGreen)
-                    Text("Başarıyla kaydedildi!", color = NeonGreen)
+                    Text(stringResource(R.string.successfully_saved), color = NeonGreen)
                 }
             }
             item {
                 Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            delay(300)
-                            onSaved()
-                        }
-                    },
+                    onClick = { coroutineScope.launch { delay(300); onSaved() } },
                     modifier = Modifier.fillMaxWidth()
-                ) { Text("Ana sayfaya dön") }
+                ) { Text(stringResource(R.string.go_home)) }
             }
         }
     }
@@ -245,22 +216,19 @@ private fun PreviewCard(
     displayCurrency: String
 ) {
     val isIncome = parsed.type == TransactionType.INCOME
-    val typeLabel = if (isIncome) "💰 Gelir" else "💸 Gider"
+    val typeLabel = if (isIncome) "💰 ${stringResource(R.string.income)}" else "💸 ${stringResource(R.string.expense)}"
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = accent.copy(alpha = 0.1f))
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text("🤖 AI Analiz Sonucu", style = MaterialTheme.typography.titleMedium, color = accent)
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(stringResource(R.string.ai_result_title), style = MaterialTheme.typography.titleMedium, color = accent)
             Text(typeLabel, color = accent, style = MaterialTheme.typography.titleMedium)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(categoryEmoji(parsed.category))
                 Spacer(Modifier.width(8.dp))
-                Text(categoryDisplayName(parsed.category))
+                Text(categoryLocalizedName(parsed.category))
             }
             Text(
                 "${parsed.amount} $displayCurrency",
@@ -268,7 +236,7 @@ private fun PreviewCard(
                 color = accent
             )
             Text(
-                "Doğru mu? Kaydet butonuna bas.",
+                stringResource(R.string.confirm_question),
                 style = MaterialTheme.typography.bodySmall,
                 color = androidx.compose.ui.graphics.Color.Gray
             )
@@ -277,41 +245,22 @@ private fun PreviewCard(
 }
 
 private fun categoryEmoji(category: String): String = when (category) {
-    "Groceries" -> "🛒"
-    "Food & Drink" -> "🍕"
-    "Transportation" -> "🚗"
-    "Technology" -> "💻"
-    "Entertainment" -> "🎬"
-    "Shopping" -> "🛍️"
-    "Health" -> "💊"
+    "Groceries"         -> "🛒"
+    "Food & Drink"      -> "🍕"
+    "Transportation"    -> "🚗"
+    "Technology"        -> "💻"
+    "Entertainment"     -> "🎬"
+    "Shopping"          -> "🛍️"
+    "Health"            -> "💊"
     "Bills & Utilities" -> "📱"
-    "Education" -> "📚"
-    "Salary" -> "💼"
-    "Freelance" -> "🖥️"
-    "Refund" -> "↩️"
-    "Meal Allowance" -> "🍱"
-    "Investment" -> "📈"
-    "Gift" -> "🎁"
-    "Other Income" -> "💵"
-    else -> "📦"
-}
-
-private fun categoryDisplayName(category: String): String = when (category) {
-    "Groceries" -> "Market"
-    "Food & Drink" -> "Yemek & İçecek"
-    "Transportation" -> "Ulaşım"
-    "Technology" -> "Teknoloji"
-    "Entertainment" -> "Eğlence"
-    "Shopping" -> "Alışveriş"
-    "Health" -> "Sağlık"
-    "Bills & Utilities" -> "Faturalar"
-    "Education" -> "Eğitim"
-    "Salary" -> "Maaş"
-    "Freelance" -> "Freelance"
-    "Refund" -> "İade"
-    "Meal Allowance" -> "Yemek Parası"
-    "Investment" -> "Yatırım"
-    "Gift" -> "Hediye / Bağış"
-    "Other Income" -> "Diğer Gelir"
-    else -> category
+    "Education"         -> "📚"
+    "Rent"              -> "🏠"
+    "Salary"            -> "💼"
+    "Freelance"         -> "🖥️"
+    "Refund"            -> "↩️"
+    "Meal Allowance"    -> "🍱"
+    "Investment"        -> "📈"
+    "Gift"              -> "🎁"
+    "Other Income"      -> "💵"
+    else                -> "📦"
 }
