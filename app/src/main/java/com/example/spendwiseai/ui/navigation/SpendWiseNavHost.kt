@@ -18,7 +18,9 @@ import com.example.spendwiseai.ui.screens.BudgetScreen
 import com.example.spendwiseai.ui.screens.HomeScreen
 import com.example.spendwiseai.ui.screens.InsightsScreen
 import com.example.spendwiseai.ui.screens.TransactionsListScreen
+import com.example.spendwiseai.ui.screens.LoginScreen
 import com.example.spendwiseai.presentation.dashboard.DashboardViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SpendWiseNavHost(
@@ -36,7 +38,7 @@ fun SpendWiseNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = SpendWiseRoutes.Home.route
+        startDestination = if (FirebaseAuth.getInstance().currentUser != null) SpendWiseRoutes.Home.route else SpendWiseRoutes.Login.route
     ) {
         composable(SpendWiseRoutes.Home.route) {
             val dashboardFactory = remember(appContainer) {
@@ -124,6 +126,15 @@ fun SpendWiseNavHost(
                 viewModel(factory = factory)
             BudgetScreen(viewModel = vm)
         }
+
+        composable(SpendWiseRoutes.Login.route) {
+            val vm: com.example.spendwiseai.presentation.auth.LoginViewModel = viewModel(factory = appContainer.provideLoginViewModelFactory())
+            LoginScreen(viewModel = vm, onLoginSuccess = {
+                navController.navigate(SpendWiseRoutes.Home.route) {
+                    popUpTo(SpendWiseRoutes.Login.route) { inclusive = true }
+                }
+            })
+        }
     }
 }
 
@@ -134,6 +145,7 @@ private object SpendWiseRoutes {
     val Incomes = Route("incomes")
     val Insights = Route("insights")
     val Budget = Route("budget")
+    val Login = Route("login")
 
     data class Route(val route: String)
 }

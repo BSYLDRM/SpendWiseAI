@@ -1,6 +1,7 @@
 package com.example.spendwiseai.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,7 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,6 +62,7 @@ import com.example.spendwiseai.ui.theme.SoftCoralRed
 fun BudgetScreen(viewModel: BudgetViewModel) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val currency = LocaleManager.getCurrency(context)
 
     var budgetInput by remember(state.monthKey) {
@@ -73,7 +78,12 @@ fun BudgetScreen(viewModel: BudgetViewModel) {
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            },
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {

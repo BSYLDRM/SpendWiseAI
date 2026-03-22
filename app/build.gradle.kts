@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    id("com.google.gms.google-services")
 }
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
@@ -81,6 +82,12 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
     implementation("com.google.mlkit:text-recognition:16.0.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

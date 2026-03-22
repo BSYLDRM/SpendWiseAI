@@ -16,5 +16,9 @@ class InsightsRepository(
     suspend fun upsert(insight: InsightEntity) {
         insightDao.upsert(insight)
     }
+
+    suspend fun clearLocalData() {
+        insightDao.deleteAll()
+    }
 }
 

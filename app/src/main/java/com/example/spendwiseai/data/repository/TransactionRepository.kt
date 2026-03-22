@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.Flow
 
 class TransactionRepository(
     private val transactionDao: TransactionDao,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val firestoreRepository: FirestoreRepository
 ) {
     suspend fun addTransaction(
         transaction: ParsedTransaction,
@@ -17,7 +18,7 @@ class TransactionRepository(
         dateMillis: Long
     ): Long {
         val categoryId = categoryRepository.getOrCreateCategoryId(transaction.category)
-        return transactionDao.insert(
+        val id = transactionDao.insert(
             TransactionEntity(
                 amount = transaction.amount,
                 currency = transaction.currency,
@@ -27,6 +28,8 @@ class TransactionRepository(
                 type = transaction.type
             )
         )
+        runCatching { firestoreRepository.upsertTransaction(id, transaction.amount, transaction.currency, transaction.category, description.trim(), dateMillis, transaction.type) }
+        return id
     }
 
     fun observeTransactions(type: TransactionType): Flow<List<TransactionWithCategory>> {
@@ -35,6 +38,7 @@ class TransactionRepository(
 
     suspend fun deleteTransaction(id: Long) {
         transactionDao.deleteById(id)
+        runCatching { firestoreRepository.deleteTransaction(id) }
     }
 
     suspend fun getTransactionById(id: Long): TransactionWithCategory? {
@@ -62,6 +66,7 @@ class TransactionRepository(
                 type = type
             )
         )
+        runCatching { firestoreRepository.upsertTransaction(id, amount, currency, categoryName, description.trim(), dateMillis, type) }
     }
 
     suspend fun getTotalAmountForType(type: TransactionType): Double {
@@ -95,5 +100,21 @@ class TransactionRepository(
     ): Flow<List<com.example.spendwiseai.data.db.dao.CategoryTotal>> {
         return transactionDao.observeCategoryTotalsBetween(type, startMillis, endMillis)
     }
-}
 
+    suspend fun syncFromFirestore() {
+        transactionDao.deleteAll()
+        val remote = firestoreRepository.fetchAllTransactions()
+        remote.forEach { tx ->
+            val categoryId = categoryRepository.getOrCreateCategoryId(tx.categoryName)
+            transactionDao.insert(TransactionEntity(
+                id = tx.id, amount = tx.amount, currency = tx.currency,
+                categoryId = categoryId, description = tx.description,
+                dateMillis = tx.dateMillis, type = tx.type
+            ))
+        }
+    }
+
+    suspend fun clearLocalData() {
+        transactionDao.deleteAll()
+    }
+}

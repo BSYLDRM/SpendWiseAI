@@ -5,10 +5,13 @@ import androidx.room.Room
 import com.example.spendwiseai.ai.gemini.GeminiExpenseTextParser
 import com.example.spendwiseai.ai.gemini.GeminiInsightsGenerator
 import com.example.spendwiseai.data.db.AppDatabase
+import com.example.spendwiseai.data.repository.AuthRepository
 import com.example.spendwiseai.data.repository.CategoryRepository
+import com.example.spendwiseai.data.repository.FirestoreRepository
 import com.example.spendwiseai.data.repository.InsightsRepository
 import com.example.spendwiseai.data.repository.TransactionRepository
 import com.example.spendwiseai.domain.usecase.AddExpenseUseCase
+import com.example.spendwiseai.presentation.auth.LoginViewModelFactory
 
 class AppContainer(context: Context) {
 
@@ -24,10 +27,15 @@ class AppContainer(context: Context) {
         CategoryRepository(database.categoryDao())
     }
 
+    val authRepository: AuthRepository by lazy { AuthRepository() }
+
+    private val firestoreRepository: FirestoreRepository by lazy { FirestoreRepository() }
+
     private val transactionRepository: TransactionRepository by lazy {
         TransactionRepository(
             transactionDao = database.transactionDao(),
-            categoryRepository = categoryRepository
+            categoryRepository = categoryRepository,
+            firestoreRepository = firestoreRepository
         )
     }
 
@@ -53,5 +61,12 @@ class AppContainer(context: Context) {
     fun provideInsightsRepository(): InsightsRepository = insightsRepository
 
     fun provideInsightsGenerator(): GeminiInsightsGenerator = insightsGenerator
-}
 
+    fun provideLoginViewModelFactory(): LoginViewModelFactory =
+        LoginViewModelFactory(authRepository, transactionRepository)
+
+    suspend fun clearAllLocalData() {
+        transactionRepository.clearLocalData()
+        insightsRepository.clearLocalData()
+    }
+}

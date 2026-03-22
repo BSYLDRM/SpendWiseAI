@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.spendwiseai" />
+                  <option name="mobileSdkAppId" value="1:10081401679:android:fd5c33c197f00f0db9633a" />
+                  <option name="projectId" value="spendwiseai-3c495" />
+                  <option name="projectNumber" value="10081401679" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

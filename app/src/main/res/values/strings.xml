@@ -128,4 +128,6 @@
     <string name="cat_investment">Investment</string>
     <string name="cat_gift">Gift</string>
     <string name="cat_other_income">Other Income</string>
+
+    <string name="default_web_client_id">YOUR_WEB_CLIENT_ID_HERE</string>
 </resources>

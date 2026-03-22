@@ -17,5 +17,8 @@ interface InsightDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(insight: InsightEntity)
+
+    @Query("DELETE FROM insights")
+    suspend fun deleteAll()
 }
 
