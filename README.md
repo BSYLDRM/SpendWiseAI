@@ -22,29 +22,29 @@
 <table>
   <tr>
     <td align="center">
-      <img src="screenshots/home.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260322_194040.png" width="160"/><br/>
       <sub><b>Ana Sayfa</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/expenses.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260322_194101.png" width="160"/><br/>
       <sub><b>Gider Takibi</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/income.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260322_194119.png" width="160"/><br/>
       <sub><b>Gelir Takibi</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="screenshots/ai_coach.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260322_194135.png" width="160"/><br/>
       <sub><b>AI Finans Koçu</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/budget.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260322_194222.png" width="160"/><br/>
       <sub><b>Bütçe Takibi</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/settings.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260322_194239.png" width="160"/><br/>
       <sub><b>Ayarlar</b></sub>
     </td>
   </tr>
@@ -187,6 +187,6 @@ Giriş  →  Room'u temizle  →  Firestore'dan kullanıcı verisini yükle
 | Min SDK | Android 8.0 (API 26) | — |
 | Target SDK | Android 14 (API 34) | — |
 
----
+
 
 </div>
