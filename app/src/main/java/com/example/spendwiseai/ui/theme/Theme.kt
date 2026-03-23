@@ -18,7 +18,7 @@ private val DarkColorScheme: ColorScheme = darkColorScheme(
     secondary = SoftCoralRed,
     tertiary = TertiaryDark,
     background = AppBackground,
-    surface = GlassSurface,
+    surface = Color(0xFF1A1D23),
 )
 
 private val LightColorScheme: ColorScheme = lightColorScheme(

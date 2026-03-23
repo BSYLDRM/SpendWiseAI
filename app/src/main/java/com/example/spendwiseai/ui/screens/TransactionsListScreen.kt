@@ -322,6 +322,7 @@ fun TransactionsListScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
+                                        .background(Color(0xFF1A1D23), RoundedCornerShape(20.dp))
                                         .background(SoftCoralRed.copy(alpha = 0.15f), RoundedCornerShape(20.dp))
                                         .padding(end = 20.dp),
                                     contentAlignment = Alignment.CenterEnd
@@ -359,7 +360,8 @@ fun TransactionsListScreen(
                             expandedDays = if (isExpanded) expandedDays - dayKey else expandedDays + dayKey
                         },
                         elevation = CardDefaults.cardElevation(2.dp),
-                        shape = RoundedCornerShape(20.dp)
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1D23))
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Row(
@@ -445,7 +447,12 @@ private fun TransactionCard(
 ) {
     val catColor = categoryColor(tx.categoryName, isIncome)
 
-    Card(elevation = CardDefaults.cardElevation(2.dp), shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
+    Card(
+        elevation = CardDefaults.cardElevation(2.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1D23)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Row(modifier = Modifier.padding(14.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(46.dp).background(catColor.copy(alpha = 0.15f), CircleShape), contentAlignment = Alignment.Center) {
                 Text(categoryEmoji(tx.categoryName), fontSize = 20.sp)
