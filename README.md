@@ -19,6 +19,9 @@
 ## 📱 Ekran Görüntüleri
 
 <div align="center">
+
+### Ana Sayfa
+
 <table>
   <tr>
     <td align="center">
@@ -27,13 +30,23 @@
     </td>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
-      <sub><b>Ana Sayfa + Grafik</b></sub>
+      <sub><b>Ana Sayfa + Gelir Grafiği</b></sub>
     </td>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200524.png" width="160"/><br/>
-      <sub><b>Gider Listesi</b></sub>
+      <sub><b>Ana Sayfa + Gider Grafiği</b></sub>
+    </td>
+    <td align="center">
+      <!-- Buraya 4. ekran görüntüsünü ekle: Ana Sayfa + Net Grafik -->
+      <img src="screenshots/PLACEHOLDER_home_net.png" width="160"/><br/>
+      <sub><b>Ana Sayfa + Net Grafik</b></sub>
     </td>
   </tr>
+</table>
+
+### İşlemler
+
+<table>
   <tr>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200622.png" width="160"/><br/>
@@ -47,36 +60,48 @@
       <img src="screenshots/Screenshot_20260323_200655.png" width="160"/><br/>
       <sub><b>Gelir Listesi</b></sub>
     </td>
-  </tr>
-  <tr>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200713.png" width="160"/><br/>
       <sub><b>Gelir Detay</b></sub>
+    </td>
+  </tr>
+</table>
+
+### AI Koç & Bütçe
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="screenshots/Screenshot_20260322_194135.png" width="160"/><br/>
+      <sub><b>AI Koç (Boş)</b></sub>
     </td>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200755.png" width="160"/><br/>
       <sub><b>AI Finans Koçu</b></sub>
     </td>
     <td align="center">
+      <img src="screenshots/Screenshot_20260322_194222.png" width="160"/><br/>
+      <sub><b>Bütçe (Boş)</b></sub>
+    </td>
+    <td align="center">
       <img src="screenshots/Screenshot_20260323_200826.png" width="160"/><br/>
       <sub><b>Bütçe Takibi</b></sub>
     </td>
   </tr>
+</table>
+
+### Diğer
+
+<table>
   <tr>
     <td align="center">
       <img src="screenshots/Screenshot_20260322_194239.png" width="160"/><br/>
       <sub><b>Ayarlar</b></sub>
     </td>
-    <td align="center">
-      <img src="screenshots/Screenshot_20260322_194135.png" width="160"/><br/>
-      <sub><b>AI Koç (Boş)</b></sub>
-    </td>
-    <td align="center">
-      <img src="screenshots/Screenshot_20260322_194222.png" width="160"/><br/>
-      <sub><b>Bütçe (Boş)</b></sub>
-    </td>
+    <!-- Buraya eklemek istediğin diğer ekran görüntülerini ekle -->
   </tr>
 </table>
+
 </div>
 
 ---
@@ -194,6 +219,9 @@ Giriş  →  Room temizle  →  Firestore'dan kullanıcı verisini yükle
 | Dependency Injection | Manuel (AppContainer) | — |
 | Min SDK | Android 8.0 (API 26) | — |
 | Target SDK | Android 14 (API 34) | — |
+
+---
+
 <div align="center">
 
 **Made with ❤️ using Kotlin & Jetpack Compose**
