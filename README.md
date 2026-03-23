@@ -33,7 +33,7 @@
       <sub><b>Ana Sayfa + Gelir Grafiği</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/Screenshot_20260323_200524.png" width="160"/><br/>
+        <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
       <sub><b>Ana Sayfa + Gider Grafiği</b></sub>
     </td>
     <td align="center">
@@ -96,10 +96,6 @@
     <td align="center">
       <img src="screenshots/Screenshot_20260322_194239.png" width="160"/><br/>
       <sub><b>Ayarlar</b></sub>
-    </td>
-    <td align="center">
-      <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
-      <sub><b>İşlem Listesi</b></sub>
     </td>
   </tr>
 </table>
