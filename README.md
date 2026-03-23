@@ -19,6 +19,16 @@
 ## 📱 Ekran Görüntüleri
 
 <div align="center">
+ 
+### Giriş Ekranları 
+  <tr>
+    <td align="center">
+      <img src="screenshots/Screenshot_20260322_194239.png" width="160"/><br/>
+      <sub><b>Ayarlar</b></sub>
+    </td>
+  </tr>
+</table>
+
 
 ### Ana Sayfa
 
