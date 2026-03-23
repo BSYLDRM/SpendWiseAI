@@ -23,8 +23,12 @@
 ### Giriş Ekranları 
   <tr>
     <td align="center">
-      <img src="screenshots/Screenshot_20260322_194239.png" width="160"/><br/>
-      <sub><b>Ayarlar</b></sub>
+      <img src="screenshots/Screenshot_20260323_214248.png" width="160"/><br/>
+      <sub><b>Hesap Oluştur</b></sub>
+    </td>
+   <td align="center">
+      <img src="screenshots/Screenshot_20260323_214248.png" width="160"/><br/>
+      <sub><b>Giriş Yap</b></sub>
     </td>
   </tr>
 </table>
