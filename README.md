@@ -49,7 +49,7 @@
   <tr>
       <td align="center">
       <img src="screenshots/Screenshot_20260322_194101.png" width="160"/><br/>
-      <sub><b>Gider Boş</b></sub>
+      <sub><b>Gider (Boş)</b></sub>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200622.png" width="160"/><br/>
       <sub><b>Gider Listesi</b></sub>
@@ -58,6 +58,9 @@
       <img src="screenshots/Screenshot_20260323_200640.png" width="160"/><br/>
       <sub><b>Gider Detay</b></sub>
     </td>
+      <td align="center">
+      <img src="screenshots/Screenshot_20260322_194119.png" width="160"/><br/>
+      <sub><b>Gelir (Boş)</b></sub>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200655.png" width="160"/><br/>
       <sub><b>Gelir Listesi</b></sub>
