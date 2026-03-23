@@ -47,13 +47,16 @@
 
 <table>
   <tr>
+      <td align="center">
+      <img src="screenshots/Screenshot_20260322_194101.png" width="160"/><br/>
+      <sub><b>Gider Boş</b></sub>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200622.png" width="160"/><br/>
-      <sub><b>Gider Detay</b></sub>
+      <sub><b>Gider Listesi</b></sub>
     </td>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200640.png" width="160"/><br/>
-      <sub><b>Gider Genişletilmiş</b></sub>
+      <sub><b>Gider Detay</b></sub>
     </td>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_200655.png" width="160"/><br/>
@@ -227,3 +230,5 @@ Giriş  →  Room temizle  →  Firestore'dan kullanıcı verisini yükle
 *Gemini AI · Firebase · Material 3*
 
 </div>
+
+
