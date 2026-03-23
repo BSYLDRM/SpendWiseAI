@@ -218,9 +218,57 @@ Kullanıcı yazar → Gemini API → ParsedTransaction
 ```
 Giriş  →  Room temizle  →  Firestore'dan kullanıcı verisini yükle
 Çıkış  →  Room temizle  →  Login ekranı
+``` 
+## 🚀 Kurulum
+ 
+### Gereksinimler
+- Android Studio Hedgehog veya üzeri
+- JDK 17+
+- Android SDK API 26+
+ 
+### 1. Repoyu klonla
+```bash
+git clone https://github.com/kullanici/spendwise-ai.git
+cd spendwise-ai
 ```
-
----
+ 
+### 2. Gemini API Key
+[Google AI Studio](https://aistudio.google.com)'dan API key al.
+`local.properties` dosyasına ekle:
+```properties
+GEMINI_API_KEY=AIza...
+```
+ 
+### 3. Firebase Kurulumu
+ 
+```bash
+# SHA-1 al
+./gradlew signingReport
+```
+ 
+- [Firebase Console](https://console.firebase.google.com) → Yeni proje → Android uygulaması ekle
+- Package name: `com.example.spendwiseai`
+- SHA-1'i Project Settings → Your apps → Add fingerprint'e ekle
+- `google-services.json` indir → `app/` klasörüne koy
+- Authentication → Google + Email/Password aktif et
+- Firestore → Rules:
+ 
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
+  }
+}
+```
+ 
+### 4. Çalıştır
+```bash
+./gradlew assembleDebug
+```
 
 ## 🛠️ Kullanılan Teknolojiler
 
@@ -246,6 +294,8 @@ Giriş  →  Room temizle  →  Firestore'dan kullanıcı verisini yükle
 **Made with ❤️ using Kotlin & Jetpack Compose**
 
 *Gemini AI · Firebase · Material 3*
+
+
 *"Güvenlik nedeniyle Firebase dosyası (google-services.json) projeye dahil edilmemiştir. Test etmek için lütfen kendi Firebase dosyanızı app/ dizinine ekleyin."*
 
 </div>
