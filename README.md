@@ -23,43 +23,57 @@
   <tr>
     <td align="center">
       <img src="screenshots/Screenshot_20260322_194040.png" width="160"/><br/>
-      <sub><b>Ana Sayfa</b></sub>
+      <sub><b>Ana Sayfa (Boş)</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/Screenshot_20260322_194101.png" width="160"/><br/>
-      <sub><b>Gider Takibi</b></sub>
+      <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
+      <sub><b>Ana Sayfa + Grafik</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/Screenshot_20260322_194119.png" width="160"/><br/>
-      <sub><b>Gelir Takibi</b></sub>
+      <img src="screenshots/Screenshot_20260323_200524.png" width="160"/><br/>
+      <sub><b>Gider Listesi</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="screenshots/Screenshot_20260322_194135.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260323_200622.png" width="160"/><br/>
+      <sub><b>Gider Detay</b></sub>
+    </td>
+    <td align="center">
+      <img src="screenshots/Screenshot_20260323_200640.png" width="160"/><br/>
+      <sub><b>Gider Genişletilmiş</b></sub>
+    </td>
+    <td align="center">
+      <img src="screenshots/Screenshot_20260323_200655.png" width="160"/><br/>
+      <sub><b>Gelir Listesi</b></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="screenshots/Screenshot_20260323_200713.png" width="160"/><br/>
+      <sub><b>Gelir Detay</b></sub>
+    </td>
+    <td align="center">
+      <img src="screenshots/Screenshot_20260323_200755.png" width="160"/><br/>
       <sub><b>AI Finans Koçu</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/Screenshot_20260322_194222.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260323_200826.png" width="160"/><br/>
       <sub><b>Bütçe Takibi</b></sub>
     </td>
+  </tr>
+  <tr>
     <td align="center">
       <img src="screenshots/Screenshot_20260322_194239.png" width="160"/><br/>
       <sub><b>Ayarlar</b></sub>
     </td>
-  </tr>
-  <tr>
     <td align="center">
-      <img src="screenshots/login.png" width="160"/><br/>
-      <sub><b>Giriş Ekranı</b></sub>
+      <img src="screenshots/Screenshot_20260322_194135.png" width="160"/><br/>
+      <sub><b>AI Koç (Boş)</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/add_transaction.png" width="160"/><br/>
-      <sub><b>İşlem Ekle (AI)</b></sub>
-    </td>
-    <td align="center">
-      <img src="screenshots/chart.png" width="160"/><br/>
-      <sub><b>Harcama Grafiği</b></sub>
+      <img src="screenshots/Screenshot_20260322_194222.png" width="160"/><br/>
+      <sub><b>Bütçe (Boş)</b></sub>
     </td>
   </tr>
 </table>
@@ -84,19 +98,20 @@ Sadece ne harcadığını yaz, AI gerisini halleder:
 - Gelir & gider kaydı, **anlık bakiye** hesaplama
 - **Donut grafik** — kategorilere göre harcama dağılımı
 - **Net durum** — gelir vs gider karşılaştırması
-- Günlük harcama özeti
+- Günlük / geçmiş günlere göre gruplandırma
+- Swipe ile silme, düzenleme
 
 ### 🎯 Bütçe Yönetimi
 - Aylık bütçe limiti belirle
 - Gerçek zamanlı harcama takibi (% olarak)
 - Limite yaklaşınca ⚡ uyarı, aşınca ⚠️ uyarı
-- Kategori bazlı bütçe dağılımı
+- Kategori bazlı bütçe dağılımı + progress bar
 
 ### 🤖 AI Finans Koçu
-- Harcama verilerini analiz eder
+- Harcama verilerini Gemini ile analiz eder
 - Kişiselleştirilmiş tasarruf önerileri sunar
 - Somut rakamlarla hedef belirler
-- Gemini ile Türkçe rapor üretir
+- Türkçe detaylı rapor üretir
 
 ### 🔄 Bulut Senkronizasyonu
 - **Firebase Firestore** — telefon değişse bile veriler kaybolmaz
@@ -112,7 +127,7 @@ Sadece ne harcadığını yaz, AI gerisini halleder:
 ### 🌍 Çoklu Dil & Para Birimi
 - 🇹🇷 Türkçe / 🇬🇧 İngilizce
 - TL · USD · EUR · GBP
-- Anlık dil değiştirme, uygulama yeniden başlar
+- Anlık dil değiştirme
 
 ---
 
@@ -130,22 +145,18 @@ Sadece ne harcadığını yaz, AI gerisini halleder:
                        │
 ┌──────────────────────▼──────────────────────────────────┐
 │                   Domain Layer                          │
-│                                                         │
 │         AddExpenseUseCase   ExpenseTextParser           │
 └──────────┬──────────────────────────────┬───────────────┘
            │                              │
 ┌──────────▼───────────┐    ┌─────────────▼──────────────┐
 │    Local (Room)      │    │      Remote (Firebase)     │
-│                      │    │                            │
 │  TransactionDao      │    │   FirestoreRepository      │
 │  CategoryDao    ◄────┼────┤   AuthRepository           │
-│  InsightDao          │    │   Firebase Auth            │
-│                      │    │   Cloud Firestore          │
+│  InsightDao          │    │   Cloud Firestore          │
 └──────────────────────┘    └────────────────────────────┘
                                           │
                              ┌────────────▼──────────────┐
                              │        AI Layer           │
-                             │                           │
                              │   GeminiRestClient        │
                              │   GeminiExpenseParser     │
                              │   GeminiInsightsGen       │
@@ -153,19 +164,16 @@ Sadece ne harcadığını yaz, AI gerisini halleder:
                              └───────────────────────────┘
 ```
 
-**Veri akışı — İşlem ekleme:**
+**Veri akışı:**
 ```
-Kullanıcı yazar
-    → Gemini API (NLP analiz)
-    → ParsedTransaction (amount, currency, category, type)
-    → Room'a yaz  ──→  UI anında güncellenir
-    → Firestore'a sync (arka planda, hata UI'ı bloklamaz)
+Kullanıcı yazar → Gemini API → ParsedTransaction
+    → Room (anında UI) → Firestore (arka planda sync)
 ```
 
-**Login / Logout veri izolasyonu:**
+**Login/Logout izolasyonu:**
 ```
-Giriş  →  Room'u temizle  →  Firestore'dan kullanıcı verisini yükle
-Çıkış  →  Room'u temizle  →  Login ekranı
+Giriş  →  Room temizle  →  Firestore'dan kullanıcı verisini yükle
+Çıkış  →  Room temizle  →  Login ekranı
 ```
 
 ---
@@ -186,7 +194,10 @@ Giriş  →  Room'u temizle  →  Firestore'dan kullanıcı verisini yükle
 | Dependency Injection | Manuel (AppContainer) | — |
 | Min SDK | Android 8.0 (API 26) | — |
 | Target SDK | Android 14 (API 34) | — |
+<div align="center">
 
+**Made with ❤️ using Kotlin & Jetpack Compose**
 
+*Gemini AI · Firebase · Material 3*
 
 </div>
