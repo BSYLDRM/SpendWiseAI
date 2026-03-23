@@ -246,6 +246,7 @@ Giriş  →  Room temizle  →  Firestore'dan kullanıcı verisini yükle
 **Made with ❤️ using Kotlin & Jetpack Compose**
 
 *Gemini AI · Firebase · Material 3*
+*"Güvenlik nedeniyle Firebase dosyası (google-services.json) projeye dahil edilmemiştir. Test etmek için lütfen kendi Firebase dosyanızı app/ dizinine ekleyin."*
 
 </div>
 
