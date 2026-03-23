@@ -110,7 +110,7 @@
   </tr>
 </table>
 
-### Diğer
+### Ayarlar
 
 <table>
   <tr>
