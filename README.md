@@ -29,7 +29,7 @@
       <sub><b>Ana Sayfa (Boş)</b></sub>
     </td>
     <td align="center">
-      <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260323_201546.png" width="160"/><br/>
       <sub><b>Ana Sayfa + Gelir Grafiği</b></sub>
     </td>
     <td align="center">
@@ -37,8 +37,7 @@
       <sub><b>Ana Sayfa + Gider Grafiği</b></sub>
     </td>
     <td align="center">
-      <!-- Buraya 4. ekran görüntüsünü ekle: Ana Sayfa + Net Grafik -->
-      <img src="screenshots/PLACEHOLDER_home_net.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260323_201559.png" width="160"/><br/>
       <sub><b>Ana Sayfa + Net Grafik</b></sub>
     </td>
   </tr>
@@ -98,7 +97,10 @@
       <img src="screenshots/Screenshot_20260322_194239.png" width="160"/><br/>
       <sub><b>Ayarlar</b></sub>
     </td>
-    <!-- Buraya eklemek istediğin diğer ekran görüntülerini ekle -->
+    <td align="center">
+      <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
+      <sub><b>İşlem Listesi</b></sub>
+    </td>
   </tr>
 </table>
 
