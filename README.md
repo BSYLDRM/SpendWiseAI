@@ -56,7 +56,7 @@
       <sub><b>Ana Sayfa + Gelir Grafiği</b></sub>
     </td>
    <td align="center">
-        <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
+        <img src="screenshots/Screenshot_20260324_210525.png" width="160"/><br/>
       <sub><b>Ana Sayfa + Gider Girme Alanı(Boş)</b></sub>
     </td>
     <td align="center">
