@@ -43,6 +43,14 @@
       <img src="screenshots/Screenshot_20260322_194040.png" width="160"/><br/>
       <sub><b>Ana Sayfa (Boş)</b></sub>
     </td>
+     <td align="center">
+      <img src="screenshots/Screenshot_20260323_201546.png" width="160"/><br/>
+      <sub><b>Ana Sayfa + Gelir Girme Alanı(Boş)</b></sub>
+    </td>
+      <td align="center">
+      <img src="screenshots/Screenshot_20260323_201546.png" width="160"/><br/>
+      <sub><b>Ana Sayfa + Gelir Analiz </b></sub>
+    </td>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_201546.png" width="160"/><br/>
       <sub><b>Ana Sayfa + Gelir Grafiği</b></sub>
