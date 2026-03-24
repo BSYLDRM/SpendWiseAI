@@ -48,12 +48,20 @@
       <sub><b>Ana Sayfa + Gelir Girme Alanı(Boş)</b></sub>
     </td>
       <td align="center">
-      <img src="screenshots/Screenshot_20260323_201546.png" width="160"/><br/>
+      <img src="screenshots/Screenshot_20260324_210714.png" width="160"/><br/>
       <sub><b>Ana Sayfa + Gelir Analiz </b></sub>
     </td>
     <td align="center">
       <img src="screenshots/Screenshot_20260323_201546.png" width="160"/><br/>
       <sub><b>Ana Sayfa + Gelir Grafiği</b></sub>
+    </td>
+   <td align="center">
+        <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
+      <sub><b>Ana Sayfa + Gider Girme Alanı(Boş)</b></sub>
+    </td>
+    <td align="center">
+        <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
+      <sub><b>Ana Sayfa + Gider Girme Analiz</b></sub>
     </td>
     <td align="center">
         <img src="screenshots/Screenshot_20260323_200509.png" width="160"/><br/>
